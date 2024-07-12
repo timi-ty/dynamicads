@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .font-inter {
+    font-family: "Inter";
+  }
+
+  /*Primary layout is done here to show how they relate to each other and so that we can use calc.*/
+
+  .top-nav {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 104px;
+  }
+
+  .middle {
+    position: relative;
+    height: calc(
+      100dvh - 104px
+    ); /*The middle of the page leaves space for the top nav*/
+  }
+}
+
+/*We don't need a html scroll bar because the page only scrolls to reveal the footer, otherwise it is a full page app.*/
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
