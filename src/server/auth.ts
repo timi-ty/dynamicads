@@ -1,14 +1,11 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
-import DiscordProvider from "next-auth/providers/discord";
-
-import { env } from "~/env";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -20,15 +17,8 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
+    };
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -38,29 +28,44 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
+    session: ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          id: token.sub || "",
+        },
+      };
+    },
+  },
+  providers: [
+    CredentialsProvider({
+      name: "Fake Credentials",
+      credentials: {
+        username: {
+          label: "Username (4+ chars)",
+          type: "text",
+          placeholder: "roxtest",
+        },
+        password: { label: "Password (4+ chars)", type: "password" },
+      },
+      async authorize(credentials, _) {
+        //Fake authorization just to have consistent user data per username in the db
+        //Authorize the user if they exist, otherwise create a new user
+        try {
+          if (!credentials) return null;
+          let result = await api.user.verify(credentials);
+          if (result.error === "") {
+            return { id: result.id };
+          } else if (result.error === "not a user") {
+            result = await api.user.create(credentials);
+            return result.error === "" ? { id: result.id } : null;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        return null;
       },
     }),
-  },
-  adapter: PrismaAdapter(db) as Adapter,
-  providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
 };
 
