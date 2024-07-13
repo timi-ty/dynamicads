@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { UploadButton } from "~/utils/uploadthing";
-import ModalOverlay from "./ModalOverlay";
+import ModalOverlay from "../_generic_components/ModalOverlay";
 import Image from "next/image";
 import { api } from "~/trpc/react";
 
@@ -16,10 +16,12 @@ type CreateEpisodeStatus =
 export default function CreateEpisodeButton() {
   const [status, setStatus] = useState<CreateEpisodeStatus>("Done");
   const [fileUrl, setFileUrl] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const createEpisode = api.episode.create.useMutation();
 
   function handleFinish(episodeName: string) {
+    setStatus("Finishing");
     createEpisode.mutate(
       { episodeName: episodeName, episodeUrl: fileUrl },
       {
@@ -48,7 +50,8 @@ export default function CreateEpisodeButton() {
         <span>Create an episode</span>
         <UploadButton
           endpoint="videoUploader"
-          onUploadProgress={(_) => {
+          onUploadProgress={(progress) => {
+            setUploadProgress(progress);
             setStatus("Uploading");
           }}
           onClientUploadComplete={(res) => {
@@ -67,6 +70,7 @@ export default function CreateEpisodeButton() {
       </button>
       <CreateEpisodeModalGroup
         status={status}
+        uploadProgress={uploadProgress}
         handleFinish={handleFinish}
         handleDismiss={handleDismiss}
       />
@@ -76,10 +80,12 @@ export default function CreateEpisodeButton() {
 
 function CreateEpisodeModalGroup({
   status,
+  uploadProgress,
   handleFinish,
   handleDismiss,
 }: Readonly<{
   status: CreateEpisodeStatus;
+  uploadProgress: number;
   handleFinish: (episodeName: string) => void;
   handleDismiss: () => void;
 }>) {
@@ -96,7 +102,11 @@ function CreateEpisodeModalGroup({
         <ModalOverlay>
           {(status === "Uploading" || status == "Finishing") && (
             <div className="flex flex-row items-center justify-center gap-2">
-              <span className="w-full">{status}</span>
+              <span>
+                {status === "Uploading"
+                  ? `${status}: ${uploadProgress}%`
+                  : status}
+              </span>
               <Image src="spinner.svg" alt={status} width={32} height={32} />
             </div>
           )}
@@ -118,7 +128,7 @@ function CreateEpisodeModalGroup({
               <input
                 type="submit"
                 value={"Finish"}
-                className="font-inter relative w-full rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
+                className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
               />
             </form>
           )}
@@ -127,7 +137,7 @@ function CreateEpisodeModalGroup({
               <span>Something went wrong.</span>
               <button
                 type="button"
-                className="font-inter relative w-full rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
+                className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
                 onClick={handleDismiss}
               >
                 Dismiss
