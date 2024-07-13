@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getServerAuthSession } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
 import AdMarkers from "./_components/AdMarkers";
+import VideoPlayer from "./_components/VideoPlayer";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -129,7 +130,10 @@ function Main({ className }: Readonly<{ className?: string }>) {
           Drug & The Link Between Milk & Cancer!
         </div>
         <div className="mt-4 text-zinc-500">Episode 503 • 12 April 2024</div>
-        <AdMarkers className="mt-8" />
+        <div className="mt-8 flex flex-row gap-8">
+          <AdMarkers />
+          <VideoPlayer />
+        </div>
       </div>
     </main>
   );
