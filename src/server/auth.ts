@@ -4,8 +4,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { db } from "~/server/db";
-import { api } from "~/trpc/server";
+import { db } from "./db";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -49,19 +48,33 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password (4+ chars)", type: "password" },
       },
       async authorize(credentials, _) {
-        //Fake authorization just to have consistent user data per username in the db
-        //Authorize the user if they exist, otherwise create a new user
+        // Fake authorization just to have consistent user data per username in the db.
+        // Authorize the user if they exist, otherwise create a new user.
+        // We can't go through trpc here because trpc depends on auth. This runs on the server only so we use the db directly.
+        if (!credentials) return null;
         try {
-          if (!credentials) return null;
-          let result = await api.user.verify(credentials);
-          if (result.error === "") {
-            return { id: result.id };
-          } else if (result.error === "not a user") {
-            result = await api.user.create(credentials);
-            return result.error === "" ? { id: result.id } : null;
+          const user = await db.user.findUnique({
+            where: {
+              username: credentials.username,
+            },
+          });
+          // Verify the user if they exist.
+          if (user) {
+            return user.password === credentials.password
+              ? { id: user.id }
+              : null;
+          } else {
+            // Create a new user if they don't exist
+            const newUser = await db.user.create({
+              data: {
+                username: credentials.username,
+                password: credentials.password,
+              },
+            });
+            return { id: newUser.id };
           }
         } catch (e) {
-          console.error(e);
+          console.log(e);
         }
         return null;
       },

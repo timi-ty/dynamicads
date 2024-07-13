@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import useVideoControls from "./useVideoControls";
+import useVideoControls from "../_hooks/useVideoControls";
 
 export default function VideoPlayer({
   className,
@@ -21,7 +21,7 @@ export default function VideoPlayer({
       <div className="flex h-[552px] w-[788px] flex-col justify-between rounded-2xl border bg-white p-8 shadow">
         <video
           ref={videoRef}
-          src="/TutorialPlusGameplay.mp4"
+          src="https://utfs.io/f/795be0e4-7261-4526-89c5-b67a1059cb4b-nsv7qj.mp4"
           className="max-h-[408px] w-full rounded-lg bg-zinc-900"
         />
         {hasVideo && videoRef.current && (

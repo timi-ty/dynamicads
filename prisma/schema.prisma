@@ -16,12 +16,14 @@ datasource db {
 
 model Episode {
     id        Int      @id @default(autoincrement())
-    name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     createdBy   User   @relation(fields: [createdById], references: [id])
     createdById String
+
+    name    String
+    fileUrl String
 
     markers Int[]
 
