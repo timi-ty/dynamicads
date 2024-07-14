@@ -66,6 +66,7 @@ export const markerRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         const markers = await ctx.db.marker.findMany({
+          orderBy: { createdAt: "asc" },
           where: { episodeId: input.episodeId },
         });
         return { markers: markers };

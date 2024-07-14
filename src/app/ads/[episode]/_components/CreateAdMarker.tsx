@@ -60,7 +60,7 @@ export default function CreateAdMarkerButtons({
         </button>
         <button
           className="font-inter flex w-full flex-row items-center justify-center gap-2 rounded-md border bg-white p-4 pb-3 pt-3 text-sm font-medium text-zinc-900"
-          onClick={() => handleFinish("A/B")}
+          onClick={() => handleFinish("Auto")}
         >
           <span>Automatically place</span>
           <Image
