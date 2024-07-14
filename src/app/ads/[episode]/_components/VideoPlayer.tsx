@@ -52,7 +52,7 @@ function VideoControls({
       <div className="flex h-16 flex-row items-center justify-between rounded-2xl border bg-white p-4 text-sm font-semibold text-zinc-500 shadow">
         <span className="flex flex-row items-center gap-2">
           <Image
-            src="ic_arrow-line-left.svg"
+            src="/ic_arrow-line-left.svg"
             alt="jump to start"
             width={32}
             height={32}
@@ -64,7 +64,7 @@ function VideoControls({
         <span className="flex flex-row items-center gap-8">
           <span className="flex flex-row items-center gap-2">
             <Image
-              src="ic_anticlockwise.svg"
+              src="/ic_anticlockwise.svg"
               alt="+10s"
               width={20}
               height={20}
@@ -73,21 +73,21 @@ function VideoControls({
             <span>10s</span>
           </span>
           <Image
-            src="ic_rewind.svg"
+            src="/ic_rewind.svg"
             alt="rewind"
             width={20}
             height={20}
             onClick={toggleRewind}
           />
           <Image
-            src={isPaused ? "ic_play.svg" : "ic_pause.svg"}
+            src={isPaused ? "/ic_play.svg" : "/ic_pause.svg"}
             alt={isPaused ? "play" : "pause"}
             width={32}
             height={32}
             onClick={togglePlay}
           />
           <Image
-            src="ic_fastforward.svg"
+            src="/ic_fastforward.svg"
             alt="fastforward"
             width={20}
             height={20}
@@ -95,7 +95,7 @@ function VideoControls({
           />
           <span className="flex flex-row items-center gap-2">
             <Image
-              src="ic_clockwise.svg"
+              src="/ic_clockwise.svg"
               alt="+10s"
               width={20}
               height={20}
@@ -107,7 +107,7 @@ function VideoControls({
         <span className="flex flex-row items-center gap-2">
           <span>Jump to end</span>
           <Image
-            src="ic_arrow-line-right.svg"
+            src="/ic_arrow-line-right.svg"
             alt="jump to end"
             width={32}
             height={32}

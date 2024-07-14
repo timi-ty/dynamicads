@@ -2,8 +2,14 @@
 
 import { ReactNode, useState } from "react";
 
-export default function withDropdown<T>(
-  BaseComponent: (props: T) => ReactNode,
+type PropsType<T> = {
+  data: T;
+  isSelected?: boolean;
+  isPicker?: boolean;
+};
+
+export default function withDropdown<T extends { id: any }>(
+  BaseComponent: (props: PropsType<T>) => ReactNode,
 ) {
   return ({
     items,
@@ -18,27 +24,30 @@ export default function withDropdown<T>(
     const [selected, setSelected] = useState(0);
     return (
       <div className={className} onClick={() => setIsExpanded((x) => !x)}>
-        {items &&
-          items.length > 0 &&
-          items[selected] &&
-          BaseComponent(items[selected])}
+        {items && items.length > 0 && items[selected] && (
+          <div key={items[selected].id}>
+            {BaseComponent({
+              data: items[selected],
+              isPicker: true,
+            })}
+          </div>
+        )}
         {isExpanded &&
           items &&
-          items.map((item, i) => {
-            return i === selected ? (
-              // Do not show the already selected item as part of the dropdown
-              <></>
-            ) : (
-              <div
-                onClick={() => {
-                  setSelected(i);
-                  if (onSelectItem) onSelectItem(item);
-                }}
-              >
-                {BaseComponent(item)}
-              </div>
-            );
-          })}
+          items.map((item, i) => (
+            <div
+              key={item.id}
+              onClick={() => {
+                setSelected(i);
+                if (onSelectItem) onSelectItem(item);
+              }}
+            >
+              {BaseComponent({
+                data: item,
+                isSelected: i === selected,
+              })}
+            </div>
+          ))}
       </div>
     );
   };

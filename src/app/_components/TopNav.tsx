@@ -7,18 +7,18 @@ export default function TopNav({
     <nav className={className}>
       <div className="flex flex-row items-center justify-between p-16 pb-6 pt-6">
         <div className="flex flex-row items-center gap-4">
-          <Image src={"ic_brandmark.svg"} alt="logo" width={24} height={24} />
+          <Image src={"/ic_brandmark.svg"} alt="logo" width={24} height={24} />
           <div className="text-2xl">Vidpod</div>
         </div>
-        <div className="flex flex-row gap-8">
+        <div className="flex flex-row items-center gap-8">
           <Image
-            src={"ic_settings.svg"}
+            src={"/ic_settings.svg"}
             alt="settings"
             width={20}
             height={20}
           />
           <Image
-            src={"ic_bell-dot.svg"}
+            src={"/ic_bell-dot.svg"}
             alt="notifications"
             width={20}
             height={20}
@@ -32,7 +32,7 @@ export default function TopNav({
             />
             <div>Emma Warren</div>
             <Image
-              src={"ic_chevron-down.svg"}
+              src={"/ic_chevron-down.svg"}
               alt="settings"
               width={16}
               height={16}

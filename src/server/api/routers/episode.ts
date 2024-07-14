@@ -52,30 +52,12 @@ export const episodeRouter = createTRPCRouter({
       }
     }),
 
-  getAll: protectedProcedure
-    .input(
-      z.object({ username: z.string().min(4), password: z.string().min(4) }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        const user = await ctx.db.user.findUnique({
-          where: {
-            username: input.username,
-          },
-        });
-        //Only create the user if they don't exist.
-        if (!user) {
-          const newUser = await ctx.db.user.create({
-            data: {
-              username: input.username,
-              password: input.password,
-            },
-          });
-          return { id: newUser.id, error: "" };
-        }
-        return { id: "", error: "username unavailable" };
-      } catch (e) {
-        return { id: "", error: "internal server error" };
-      }
-    }),
+  getAll: protectedProcedure.query(async ({ ctx, input }) => {
+    try {
+      const episodes = await ctx.db.episode.findMany();
+      return { episodes: episodes, error: "" };
+    } catch (e) {
+      return { episodes: [], error: "internal server error" };
+    }
+  }),
 });

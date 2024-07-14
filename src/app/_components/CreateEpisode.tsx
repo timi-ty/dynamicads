@@ -18,6 +18,7 @@ export default function CreateEpisodeButton() {
   const [fileUrl, setFileUrl] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  const utils = api.useUtils();
   const createEpisode = api.episode.create.useMutation();
 
   function handleFinish(episodeName: string) {
@@ -27,6 +28,7 @@ export default function CreateEpisodeButton() {
       {
         onSuccess: () => {
           setStatus("Done");
+          utils.episode.invalidate();
         },
         onError: () => {
           setStatus("Error");
@@ -96,56 +98,60 @@ function CreateEpisodeModalGroup({
     handleFinish(episodeName);
   }
 
-  return (
-    <>
-      {status !== "Done" && (
-        <ModalOverlay>
-          {(status === "Uploading" || status == "Finishing") && (
-            <div className="flex flex-row items-center justify-center gap-2">
-              <span>
-                {status === "Uploading"
-                  ? `${status}: ${uploadProgress}%`
-                  : status}
-              </span>
-              <Image src="spinner.svg" alt={status} width={32} height={32} />
-            </div>
-          )}
-          {status === "Naming" && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <label htmlFor="input_name_episode" className="text-sm">
-                Name your episode:
-              </label>
-              <input
-                className="h-10 w-64 rounded border p-2"
-                id="input_name_episode"
-                type="text"
-                maxLength={30}
-                minLength={4}
-                required
-                value={episodeName}
-                onChange={(ev) => setEpisodeName(ev.target.value)}
-              />
-              <input
-                type="submit"
-                value={"Finish"}
-                className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
-              />
-            </form>
-          )}
-          {status === "Error" && (
-            <div className="flex flex-col gap-8">
-              <span>Something went wrong.</span>
-              <button
-                type="button"
-                className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
-                onClick={handleDismiss}
-              >
-                Dismiss
-              </button>
-            </div>
-          )}
-        </ModalOverlay>
-      )}
-    </>
-  );
+  if (status === "Uploading" || status == "Finishing") {
+    return (
+      <ModalOverlay>
+        <div className="flex flex-row items-center justify-center gap-2">
+          <span>
+            {status === "Uploading" ? `${status}: ${uploadProgress}%` : status}
+          </span>
+          <Image src="/spinner.svg" alt={status} width={32} height={32} />
+        </div>
+      </ModalOverlay>
+    );
+  }
+
+  if (status === "Naming") {
+    return (
+      <ModalOverlay>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label htmlFor="input_name_episode" className="text-sm">
+            Name your episode:
+          </label>
+          <input
+            className="h-10 w-64 rounded border p-2"
+            id="input_name_episode"
+            type="text"
+            maxLength={30}
+            minLength={4}
+            required
+            value={episodeName}
+            onChange={(ev) => setEpisodeName(ev.target.value)}
+          />
+          <input
+            type="submit"
+            value={"Finish"}
+            className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
+          />
+        </form>
+      </ModalOverlay>
+    );
+  }
+
+  if (status === "Error") {
+    return (
+      <div className="flex flex-col gap-8">
+        <span>Something went wrong.</span>
+        <button
+          type="button"
+          className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
+          onClick={handleDismiss}
+        >
+          Dismiss
+        </button>
+      </div>
+    );
+  }
+
+  return <></>;
 }

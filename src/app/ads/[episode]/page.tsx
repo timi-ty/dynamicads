@@ -1,9 +1,10 @@
-import AdMarkers from "./AdMarkers";
-import VideoPlayer from "./VideoPlayer";
+import AdMarkers from "./_components/AdMarkers";
+import VideoPlayer from "./_components/VideoPlayer";
 
 export default function EpisodeViewer({
+  params,
   className,
-}: Readonly<{ className?: string }>) {
+}: Readonly<{ params: { episodeId: string }; className?: string }>) {
   return (
     <main className={className}>
       <div className="p-16">

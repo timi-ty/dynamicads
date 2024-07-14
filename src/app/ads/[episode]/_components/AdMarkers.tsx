@@ -19,7 +19,7 @@ export default function AdMarkers({
           <button className="font-inter flex w-full flex-row items-center justify-center gap-2 rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50">
             <span>Create ad marker</span>
             <Image
-              src="ic_plus.svg"
+              src="/ic_plus.svg"
               alt="create ad marker"
               width={16}
               height={16}
@@ -57,7 +57,7 @@ function MarkerItem({ className }: Readonly<{ className?: string }>) {
               Edit
             </span>
             <Image
-              src="ic_trash.svg"
+              src="/ic_trash.svg"
               alt="trash"
               width={36}
               height={36}
