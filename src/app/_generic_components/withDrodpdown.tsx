@@ -10,6 +10,7 @@ type PropsType<T, K> = {
   data: T & IdType<K>;
   isSelected?: boolean;
   isPicker?: boolean;
+  isExpanded?: boolean;
 };
 
 export default function withDropdown<T extends { id: K }, K>(
@@ -41,6 +42,7 @@ export default function withDropdown<T extends { id: K }, K>(
           BaseComponent({
             data: selectedItem,
             isPicker: true,
+            isExpanded: isExpanded,
           })}
         {isExpanded &&
           items &&
@@ -55,6 +57,7 @@ export default function withDropdown<T extends { id: K }, K>(
               {BaseComponent({
                 data: item,
                 isSelected: item.id === selectedItem?.id,
+                isExpanded: true,
               })}
             </div>
           ))}

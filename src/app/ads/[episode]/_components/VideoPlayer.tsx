@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import useVideoControls from "../_hooks/useVideoControls";
-import { api } from "~/trpc/react";
 
 export default function VideoPlayer({
   className,

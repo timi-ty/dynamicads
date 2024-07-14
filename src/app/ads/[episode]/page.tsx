@@ -7,21 +7,8 @@ import Image from "next/image";
 export default function EpisodePage({
   params,
 }: Readonly<{ params: { episode: string } }>) {
-  console.log("ep id: ", params.episode);
   return (
-    <Suspense
-      fallback={
-        <div className="flex h-full flex-row items-center justify-center gap-2 text-zinc-500">
-          <span>Loading Episode</span>
-          <Image
-            src="/spinner.svg"
-            alt={"loading episode"}
-            width={32}
-            height={32}
-          />
-        </div>
-      }
-    >
+    <Suspense fallback={<Loader />}>
       <EpisodeViewer episodeId={parseInt(params.episode)} />
     </Suspense>
   );
@@ -48,7 +35,7 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
           </span>
         </div>
         <div className="mt-8 flex flex-row gap-8">
-          <AdMarkers />
+          <AdMarkers episodeId={data.episode.id} />
           <VideoPlayer videoUrl={data.episode.fileUrl} />
         </div>
       </div>
@@ -57,6 +44,20 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
   return (
     <div className="flex h-full flex-row items-center justify-center text-zinc-500">
       <span>No episode.</span>
+    </div>
+  );
+}
+
+function Loader() {
+  return (
+    <div className="flex h-full flex-row items-center justify-center gap-2 text-zinc-500">
+      <span>Loading Episode</span>
+      <Image
+        src="/spinner.svg"
+        alt={"loading episode"}
+        width={32}
+        height={32}
+      />
     </div>
   );
 }

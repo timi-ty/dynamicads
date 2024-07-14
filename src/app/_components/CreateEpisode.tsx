@@ -18,7 +18,7 @@ export default function CreateEpisodeButton() {
   const [fileUrl, setFileUrl] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const utils = api.useUtils();
+  const queryApi = api.useUtils();
   const createEpisode = api.episode.create.useMutation();
 
   function handleFinish(episodeName: string) {
@@ -28,7 +28,7 @@ export default function CreateEpisodeButton() {
       {
         onSuccess: () => {
           setStatus("Done");
-          utils.episode.invalidate();
+          queryApi.episode.invalidate();
         },
         onError: () => {
           setStatus("Error");
@@ -43,8 +43,9 @@ export default function CreateEpisodeButton() {
 
   return (
     <>
-      {/*Here we overlap the upload thing upload button with ours and make it
-      transparent so that it can handle the click without affecting the UI*/}
+      {/*Here we overlap the upload thing upload button on ours and make it
+      transparent so that it can handle the click without affecting the UI. 
+      Using upload thing for ease only. Would use direct s3 in production.*/}
       <div className="font-inter pointer-events-none relative w-64 rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-center text-sm font-medium text-zinc-50">
         <span>Create an episode</span>
         <UploadButton
@@ -95,7 +96,7 @@ function CreateEpisodeModalGroup({
     handleFinish(episodeName);
   }
 
-  if (status === "Uploading" || status == "Finishing")
+  if (status === "Uploading" || status === "Finishing")
     return (
       <ModalOverlay>
         <div className="flex flex-row items-center justify-center gap-2">
@@ -135,16 +136,18 @@ function CreateEpisodeModalGroup({
 
   if (status === "Error")
     return (
-      <div className="flex flex-col gap-8">
-        <span>Something went wrong.</span>
-        <button
-          type="button"
-          className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
-          onClick={handleDismiss}
-        >
-          Dismiss
-        </button>
-      </div>
+      <ModalOverlay>
+        <div className="flex flex-col gap-8">
+          <span>Something went wrong.</span>
+          <button
+            type="button"
+            className="font-inter relative w-full cursor-pointer rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
+            onClick={handleDismiss}
+          >
+            Dismiss
+          </button>
+        </div>
+      </ModalOverlay>
     );
 
   return <></>;
