@@ -4,6 +4,7 @@ import Image from "next/image";
 import withDropdown from "../_generic_components/withDrodpdown";
 import { api } from "~/trpc/react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 function EpisodeItem({
   data,
@@ -47,7 +48,7 @@ function EpisodeItem({
 
 function EpisodeEmpty({ hasError }: Readonly<{ hasError?: boolean }>) {
   return (
-    <span className="justify-left mt-4 flex w-64 flex-row items-center gap-10 rounded-md border p-4 pb-3 pt-3 text-sm font-medium">
+    <span className="justify-left mt-4 flex w-64 flex-row items-center gap-8 rounded-md border p-4 pb-3 pt-3 text-sm font-medium">
       <Image
         src={"/placeholder_episode-thumbnail.png"}
         alt="profile"
@@ -63,12 +64,28 @@ const EpisodeDropdown = withDropdown(EpisodeItem);
 
 export default function EpisodePicker() {
   const { data, error } = api.episode.getAll.useQuery();
+  const [initialSelection, setInitialSelection] = useState<number>();
 
-  if (error || (data && data.error != ""))
-    return <EpisodeEmpty hasError={true} />;
+  // Everytime we get updated data, get the selected episode from local storage.
+  useEffect(() => {
+    const savedSelected = localStorage.getItem("selected_episode_id");
+    if (!savedSelected) return;
+    setInitialSelection(parseInt(savedSelected));
+  }, [data]);
 
-  if (data && data.episodes.length > 0)
-    return <EpisodeDropdown items={data.episodes} />;
+  if (error || (data && data.error)) return <EpisodeEmpty hasError={true} />;
+
+  if (data && data.episodes && data.episodes.length > 0)
+    return (
+      <EpisodeDropdown
+        items={data.episodes}
+        selectedId={initialSelection}
+        onSelectItem={(item) => {
+          // We can use local storage here becuase it is a user triggered event only.
+          localStorage.setItem("selected_episode_id", item.id.toString());
+        }}
+      />
+    );
 
   return <EpisodeEmpty />;
 }

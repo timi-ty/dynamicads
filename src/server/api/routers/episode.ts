@@ -19,7 +19,7 @@ export const episodeRouter = createTRPCRouter({
             createdBy: { connect: { id: ctx.session.user.id } },
           },
         });
-        return { error: "" };
+        return { error: null };
       } catch (e) {
         return { error: "internal server error" };
       }
@@ -44,20 +44,36 @@ export const episodeRouter = createTRPCRouter({
               password: input.password,
             },
           });
-          return { id: newUser.id, error: "" };
+          return { id: newUser.id, error: null };
         }
-        return { id: "", error: "username unavailable" };
+        return { id: null, error: "username unavailable" };
       } catch (e) {
-        return { id: "", error: "internal server error" };
+        return { id: null, error: "internal server error" };
       }
     }),
 
-  getAll: protectedProcedure.query(async ({ ctx, input }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     try {
       const episodes = await ctx.db.episode.findMany();
-      return { episodes: episodes, error: "" };
+      return { episodes: episodes, error: null };
     } catch (e) {
-      return { episodes: [], error: "internal server error" };
+      return { episodes: null, error: "internal server error" };
     }
   }),
+
+  get: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const episode = await ctx.db.episode.findUniqueOrThrow({
+          where: { id: input.id, createdById: ctx.session.user.id },
+        });
+        return { episode: episode, error: null };
+      } catch (e: any) {
+        if (e.code === "P2025") {
+          return { episode: null, error: "not an episode" };
+        }
+        return { episode: null, error: "internal server error" };
+      }
+    }),
 });

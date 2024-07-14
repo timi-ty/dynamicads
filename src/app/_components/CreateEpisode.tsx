@@ -45,10 +45,7 @@ export default function CreateEpisodeButton() {
     <>
       {/*Here we overlap the upload thing upload button with ours and make it
       transparent so that it can handle the click without affecting the UI*/}
-      <button
-        type="button"
-        className="font-inter pointer-events-none relative w-64 rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
-      >
+      <div className="font-inter pointer-events-none relative w-64 rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-center text-sm font-medium text-zinc-50">
         <span>Create an episode</span>
         <UploadButton
           endpoint="videoUploader"
@@ -69,7 +66,7 @@ export default function CreateEpisodeButton() {
           }}
           className="pointer-events-auto absolute bottom-[-16px] left-0 right-0 top-0 w-full overflow-hidden opacity-0"
         />
-      </button>
+      </div>
       <CreateEpisodeModalGroup
         status={status}
         uploadProgress={uploadProgress}
@@ -98,7 +95,7 @@ function CreateEpisodeModalGroup({
     handleFinish(episodeName);
   }
 
-  if (status === "Uploading" || status == "Finishing") {
+  if (status === "Uploading" || status == "Finishing")
     return (
       <ModalOverlay>
         <div className="flex flex-row items-center justify-center gap-2">
@@ -109,9 +106,8 @@ function CreateEpisodeModalGroup({
         </div>
       </ModalOverlay>
     );
-  }
 
-  if (status === "Naming") {
+  if (status === "Naming")
     return (
       <ModalOverlay>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -136,9 +132,8 @@ function CreateEpisodeModalGroup({
         </form>
       </ModalOverlay>
     );
-  }
 
-  if (status === "Error") {
+  if (status === "Error")
     return (
       <div className="flex flex-col gap-8">
         <span>Something went wrong.</span>
@@ -151,7 +146,6 @@ function CreateEpisodeModalGroup({
         </button>
       </div>
     );
-  }
 
   return <></>;
 }

@@ -10,7 +10,7 @@ export default function Footer({
           Video first podcasts
         </span>
         <div className="flex flex-row items-center gap-4">
-          <Image src={"ic_brandmark.svg"} alt="logo" width={24} height={24} />
+          <Image src={"/ic_brandmark.svg"} alt="logo" width={24} height={24} />
           <span className="text-2xl">Vidpod</span>
         </div>
       </div>

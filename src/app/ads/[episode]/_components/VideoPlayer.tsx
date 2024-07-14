@@ -3,10 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import useVideoControls from "../_hooks/useVideoControls";
+import { api } from "~/trpc/react";
 
 export default function VideoPlayer({
   className,
-}: Readonly<{ className?: string }>) {
+  videoUrl,
+}: Readonly<{ className?: string; videoUrl: string }>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasVideo, setHasVideo] = useState(
     videoRef.current !== null && videoRef.current !== undefined,
@@ -21,8 +23,8 @@ export default function VideoPlayer({
       <div className="flex h-[552px] w-[788px] flex-col justify-between rounded-2xl border bg-white p-8 shadow">
         <video
           ref={videoRef}
-          src="https://utfs.io/f/795be0e4-7261-4526-89c5-b67a1059cb4b-nsv7qj.mp4"
-          className="max-h-[408px] w-full rounded-lg bg-zinc-900"
+          src={videoUrl}
+          className="h-[408px] w-full rounded-lg bg-zinc-900"
         />
         {hasVideo && videoRef.current && (
           <VideoControls video={videoRef.current} />

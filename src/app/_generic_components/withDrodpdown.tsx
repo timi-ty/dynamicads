@@ -1,50 +1,60 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
-type PropsType<T> = {
-  data: T;
+type IdType<K> = {
+  id: K;
+};
+
+type PropsType<T, K> = {
+  data: T & IdType<K>;
   isSelected?: boolean;
   isPicker?: boolean;
 };
 
-export default function withDropdown<T extends { id: any }>(
-  BaseComponent: (props: PropsType<T>) => ReactNode,
+export default function withDropdown<T extends { id: K }, K>(
+  BaseComponent: (props: PropsType<T, K>) => ReactNode,
 ) {
   return ({
     items,
+    selectedId,
     onSelectItem,
     className,
   }: Readonly<{
     items: T[];
+    selectedId?: K;
     onSelectItem?: (selected: T) => void;
     className?: string;
   }>) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [selected, setSelected] = useState(0);
+    const [selectedItem, setSelectedItem] = useState(items[0]);
+
+    useEffect(() => {
+      // selectedId can be undefined in which case it does nothing
+      if (!selectedId) return;
+      setSelectedItem(items.find((item) => item.id === selectedId));
+    }, [selectedId]);
+
     return (
       <div className={className} onClick={() => setIsExpanded((x) => !x)}>
-        {items && items.length > 0 && items[selected] && (
-          <div key={items[selected].id}>
-            {BaseComponent({
-              data: items[selected],
-              isPicker: true,
-            })}
-          </div>
-        )}
+        {selectedItem &&
+          BaseComponent({
+            data: selectedItem,
+            isPicker: true,
+          })}
         {isExpanded &&
           items &&
-          items.map((item, i) => (
+          items.map((item) => (
             <div
-              key={item.id}
+              key={item.id as any}
               onClick={() => {
-                setSelected(i);
+                setSelectedItem(item);
                 if (onSelectItem) onSelectItem(item);
               }}
             >
               {BaseComponent({
                 data: item,
-                isSelected: i === selected,
+                isSelected: item.id === selectedItem?.id,
               })}
             </div>
           ))}

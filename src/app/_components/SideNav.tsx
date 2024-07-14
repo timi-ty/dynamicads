@@ -2,10 +2,13 @@ import Image from "next/image";
 import CreateEpisodeButton from "./CreateEpisode";
 import EpisodePicker from "./EpisodePicker";
 import Link from "next/link";
+import { api } from "~/trpc/server";
 
 export default function SideNav({
   className,
 }: Readonly<{ className?: string }>) {
+  api.episode.getAll.prefetch();
+
   return (
     <nav className={className}>
       <div className="w-80 p-8">

@@ -32,9 +32,9 @@ export default async function RootLayout({
                 <TopNav className="top-nav border-b bg-zinc-50" />
                 <div className="middle flex flex-row">
                   <SideNav className="h-full flex-shrink-0 overflow-y-auto border-r bg-zinc-50" />
-                  <div className="h-full flex-grow overflow-auto bg-zinc-50">
+                  <main className="h-full flex-grow overflow-auto bg-zinc-50">
                     {children}
-                  </div>
+                  </main>
                 </div>
                 <Footer className="border-t bg-zinc-50" />
               </>
