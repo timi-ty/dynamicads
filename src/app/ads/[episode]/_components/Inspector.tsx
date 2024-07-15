@@ -1,10 +1,10 @@
 "use client";
 
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { videoLengthAtom, videoTimeAtom } from "./VideoPlayer";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { millisecondsToHHMMSS } from "~/utils/format";
 import Image from "next/image";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from "react";
+import { videoLengthAtom, videoTimeAtom } from "../_hooks/useVideoControls";
 
 const scrubberLengthPerSecondPerZoom = 121; // px
 const zoomIndexAtom = atom(0);
@@ -16,7 +16,7 @@ export default function Inspector({
 }>) {
   return (
     <div className={className}>
-      <div className="flex h-[358px] min-w-[1232px] flex-col justify-between rounded-2xl border p-8 shadow">
+      <div className="flex min-h-[358px] min-w-[1232px] flex-col justify-between rounded-2xl border p-8 shadow">
         <Controls />
         <Scrubber />
       </div>
@@ -104,25 +104,42 @@ function ZoomSlider() {
 
 function Scrubber() {
   const videoLength = useAtomValue(videoLengthAtom);
+  const videoTime = useAtomValue(videoTimeAtom);
   const zoomIndex = useAtomValue(zoomIndexAtom);
   const width = Math.ceil(
     scrubberLengthPerSecondPerZoom * videoLength * zoomFromIndex(zoomIndex),
   );
+  const progress =
+    scrubberLengthPerSecondPerZoom * videoTime * zoomFromIndex(zoomIndex);
   const timesStamps = Array.from(
     { length: Math.ceil(videoLength) },
     (_, i) => i,
   );
 
   return (
-    <div className="w-full overflow-x-scroll pb-8">
-      <div
-        className="h-[182px] overflow-hidden"
-        style={{ width: `${width + 16}px` }}
-      >
-        <div className="h-32 w-full rounded-lg bg-zinc-900 p-2">
-          <div className="h-full w-full rounded-lg bg-fuchsia-300"></div>
+    <div className="w-full overflow-x-scroll pb-8 pt-4">
+      {/**We have to add all the left + right padding leading down to the pink area to this width to give the pink area the correct width.*/}
+      <div className="h-[221px]" style={{ width: `${width + 32}px` }}>
+        <div className="relative h-[167px] w-full">
+          <div className="absolute bottom-0 left-0 right-0 h-32 w-full pe-2 ps-2">
+            <div className="h-full w-full rounded-lg bg-zinc-900 p-2">
+              {/**This pink area is the length of the video. Its width should directly match the calculated width.*/}
+              <div className="h-full w-full rounded-lg bg-fuchsia-300"></div>
+            </div>
+          </div>
+          <div
+            className="absolute bottom-0 top-0 h-full w-8"
+            style={{ left: `${progress}px` }}
+          >
+            <Image
+              src="/scrubber-thumb.svg"
+              alt="scrubber thumb"
+              width={32}
+              height={167}
+            />
+          </div>
         </div>
-        <div className="flex flex-row pe-2 ps-2">
+        <div className="flex w-full flex-row overflow-x-hidden pe-2 ps-2">
           {timesStamps.map((i) => (
             <TimeStamp key={i} seconds={i} zoom={zoomFromIndex(zoomIndex)} />
           ))}
@@ -144,7 +161,7 @@ function TimeStamp({
       style={{ width: `${width}px` }}
     >
       <div
-        className={`absolute flex h-full w-full flex-row items-center justify-center ${width > 74 ? "text-sm" : "text-xs"} font-semibold text-zinc-500`}
+        className={`absolute flex h-full w-full flex-row items-center justify-center ${width > 80 ? "text-sm" : "text-xs"} font-semibold text-zinc-500`}
       >
         <div>{millisecondsToHHMMSS(seconds * 1000)}</div>
       </div>

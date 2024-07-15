@@ -2,11 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import useVideoControls from "../_hooks/useVideoControls";
 import { atom, useSetAtom } from "jotai";
-
-export const videoLengthAtom = atom(0);
-export const videoTimeAtom = atom(0);
+import { useThisVideoControls } from "../_hooks/useVideoControls";
 
 export default function VideoPlayer({
   className,
@@ -16,25 +13,10 @@ export default function VideoPlayer({
   const [hasVideo, setHasVideo] = useState(
     videoRef.current !== null && videoRef.current !== undefined,
   );
-  const setVideoLength = useSetAtom(videoLengthAtom);
-  const setVideoTime = useSetAtom(videoTimeAtom);
 
+  // This effect helps ensure that controls only render when video element is available.
   useEffect(() => {
     setHasVideo(videoRef.current !== null && videoRef.current !== undefined);
-    if (!videoRef.current) return;
-    const currentVideo = videoRef.current;
-    function handleDurationChange() {
-      setVideoLength(currentVideo.duration);
-    }
-    function handleTimeUpdate() {
-      setVideoTime(currentVideo.currentTime);
-    }
-    currentVideo.addEventListener("durationchange", handleDurationChange);
-    currentVideo.addEventListener("timeupdate", handleTimeUpdate);
-    return () => {
-      currentVideo.removeEventListener("durationchange", handleDurationChange);
-      currentVideo.removeEventListener("timeupdate", handleTimeUpdate);
-    };
   }, [videoRef.current]);
 
   return (
@@ -66,7 +48,7 @@ function VideoControls({
     toggleFastforward,
     jumpToStart,
     jumpToEnd,
-  } = useVideoControls(video);
+  } = useThisVideoControls(video);
 
   return (
     <div className={className}>
