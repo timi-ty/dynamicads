@@ -1,5 +1,5 @@
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 // This hook operates at a global scope.
 // Any consumer of this hook controls the singular video element in this app.
@@ -165,6 +165,8 @@ export function useVideoControls() {
 
   return {
     isPaused,
+    videoTime,
+    videoLength,
     togglePlay,
     plusSeconds,
     minusSeconds,
@@ -179,6 +181,10 @@ export function useVideoControls() {
 
 export function useThisVideoControls(video: HTMLVideoElement) {
   const setVideo = useSetAtom(videoAtom);
-  setVideo(video);
+
+  useEffect(() => {
+    setVideo(video);
+  }, []);
+
   return useVideoControls();
 }

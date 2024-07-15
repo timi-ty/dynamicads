@@ -3,29 +3,46 @@
 import { atom, useAtom, useAtomValue } from "jotai";
 import { millisecondsToHHMMSS } from "~/utils/format";
 import Image from "next/image";
-import { ChangeEvent } from "react";
-import { videoLengthAtom, videoTimeAtom } from "../_hooks/useVideoControls";
+import { ChangeEvent, useState } from "react";
+import { useVideoControls } from "../_hooks/useVideoControls";
 
 const scrubberLengthPerSecondPerZoom = 121; // px
-const zoomIndexAtom = atom(0);
 
 export default function Inspector({
   className,
 }: Readonly<{
   className?: string;
 }>) {
+  // This min is a magic value selected to just fit the scrubber within its container.
+  // Zoom levels below this will make the timestamp have too little space for text.
+  const minZoomIndex = -0.28;
+  const maxZoomIndex = 1;
+  const [zoomIndex, setZoomIndex] = useState(0);
+
   return (
     <div className={className}>
       <div className="flex min-h-[358px] min-w-[1232px] flex-col justify-between rounded-2xl border p-8 shadow">
-        <Controls />
-        <Scrubber />
+        <Controls
+          zoomIndex={zoomIndex}
+          setZoomIndex={(index) => setZoomIndex(index)}
+          zoomOpts={{ minZoomIndex, maxZoomIndex }}
+        />
+        <Scrubber zoomIndex={zoomIndex} />
       </div>
     </div>
   );
 }
 
-function Controls() {
-  const videoTime = useAtomValue(videoTimeAtom);
+function Controls({
+  zoomIndex,
+  setZoomIndex,
+  zoomOpts,
+}: Readonly<{
+  zoomIndex: number;
+  setZoomIndex: (index: number) => void;
+  zoomOpts?: { minZoomIndex?: number; maxZoomIndex?: number };
+}>) {
+  const { videoTime } = useVideoControls();
 
   return (
     <div className="flex flex-row items-center justify-between text-zinc-500">
@@ -54,20 +71,26 @@ function Controls() {
       <span className="rounded-md border p-3 pb-2 pt-2">
         {millisecondsToHHMMSS(videoTime * 1000)}
       </span>
-      <ZoomSlider />
+      <ZoomSlider
+        zoomIndex={zoomIndex}
+        setZoomIndex={setZoomIndex}
+        zoomOpts={zoomOpts}
+      />
     </div>
   );
 }
 
-function ZoomSlider() {
-  // This min is a magic value selected to just fit the scrubber within its container.
-  // Zoom levels below this will make the timestamp have too little space for text.
-  const minZoomIndex = -0.28;
-  const maxZoomIndex = 1;
-  const [zoomIndex, setZoomIndex] = useAtom(zoomIndexAtom);
-
+function ZoomSlider({
+  zoomIndex,
+  setZoomIndex,
+  zoomOpts,
+}: Readonly<{
+  zoomIndex: number;
+  setZoomIndex: (index: number) => void;
+  zoomOpts?: { minZoomIndex?: number; maxZoomIndex?: number };
+}>) {
   function handleSliderChange(ev: ChangeEvent<HTMLInputElement>) {
-    // Remap the slider values (-28-100) to min/max zoomIndex (-0.28-1)
+    // Remap the slider values back to min/max zoomIndex.
     const newValue = parseFloat(ev.target.value) * 0.01;
     setZoomIndex(newValue);
   }
@@ -84,8 +107,8 @@ function ZoomSlider() {
       </button>
       <input
         type="range"
-        min={minZoomIndex * 100}
-        max={maxZoomIndex * 100}
+        min={(zoomOpts?.minZoomIndex || 0) * 100}
+        max={(zoomOpts?.maxZoomIndex || 1) * 100}
         value={zoomIndex * 100}
         className="slider"
         onChange={handleSliderChange}
@@ -102,10 +125,8 @@ function ZoomSlider() {
   );
 }
 
-function Scrubber() {
-  const videoLength = useAtomValue(videoLengthAtom);
-  const videoTime = useAtomValue(videoTimeAtom);
-  const zoomIndex = useAtomValue(zoomIndexAtom);
+function Scrubber({ zoomIndex }: Readonly<{ zoomIndex: number }>) {
+  const { videoLength, videoTime } = useVideoControls();
   const width = Math.ceil(
     scrubberLengthPerSecondPerZoom * videoLength * zoomFromIndex(zoomIndex),
   );

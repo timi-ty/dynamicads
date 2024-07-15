@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { atom, useSetAtom } from "jotai";
 import { useThisVideoControls } from "../_hooks/useVideoControls";
 
 export default function VideoPlayer({
