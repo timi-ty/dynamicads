@@ -23,6 +23,42 @@
       100dvh - 104px
     ); /*The middle of the page leaves space for the top nav*/
   }
+
+  /*Styling slider here for convenience*/
+
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #d4d4d8;
+    outline: none;
+    border-radius: 9999px;
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
+  }
+
+  .slider:hover {
+    opacity: 1;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #27272a;
+    border-radius: 9999px;
+    cursor: pointer;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #27272a;
+    border-radius: 9999px;
+    cursor: pointer;
+  }
 }
 
 /*We don't need a html scroll bar because the page only scrolls to reveal the footer, otherwise it is a full page app.*/

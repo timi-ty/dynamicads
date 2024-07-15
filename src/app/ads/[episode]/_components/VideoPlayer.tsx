@@ -3,6 +3,10 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import useVideoControls from "../_hooks/useVideoControls";
+import { atom, useSetAtom } from "jotai";
+
+export const videoLengthAtom = atom(0);
+export const videoTimeAtom = atom(0);
 
 export default function VideoPlayer({
   className,
@@ -12,9 +16,25 @@ export default function VideoPlayer({
   const [hasVideo, setHasVideo] = useState(
     videoRef.current !== null && videoRef.current !== undefined,
   );
+  const setVideoLength = useSetAtom(videoLengthAtom);
+  const setVideoTime = useSetAtom(videoTimeAtom);
 
   useEffect(() => {
     setHasVideo(videoRef.current !== null && videoRef.current !== undefined);
+    if (!videoRef.current) return;
+    const currentVideo = videoRef.current;
+    function handleDurationChange() {
+      setVideoLength(currentVideo.duration);
+    }
+    function handleTimeUpdate() {
+      setVideoTime(currentVideo.currentTime);
+    }
+    currentVideo.addEventListener("durationchange", handleDurationChange);
+    currentVideo.addEventListener("timeupdate", handleTimeUpdate);
+    return () => {
+      currentVideo.removeEventListener("durationchange", handleDurationChange);
+      currentVideo.removeEventListener("timeupdate", handleTimeUpdate);
+    };
   }, [videoRef.current]);
 
   return (
@@ -51,17 +71,20 @@ function VideoControls({
   return (
     <div className={className}>
       <div className="flex h-16 flex-row items-center justify-between rounded-2xl border bg-white p-4 text-sm font-semibold text-zinc-500 shadow">
-        <span className="flex flex-row items-center gap-2">
+        <button
+          className="flex flex-row items-center gap-2"
+          onClick={jumpToStart}
+          type="button"
+        >
           <Image
             src="/ic_arrow-line-left.svg"
             alt="jump to start"
             width={32}
             height={32}
             className="rounded-full border p-2"
-            onClick={jumpToStart}
           />
           <span>Jump to start</span>
-        </span>
+        </button>
         <span className="flex flex-row items-center gap-8">
           <span className="flex flex-row items-center gap-2">
             <Image

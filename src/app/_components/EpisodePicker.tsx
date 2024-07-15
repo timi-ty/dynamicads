@@ -4,7 +4,6 @@ import Image from "next/image";
 import withDropdown from "../_generic_components/withDrodpdown";
 import { api } from "~/trpc/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { atomWithStorage } from "jotai/utils";
 import { useAtom } from "jotai";
 

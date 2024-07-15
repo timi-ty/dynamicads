@@ -3,6 +3,7 @@ import AdMarkers from "./_components/AdMarkers";
 import VideoPlayer from "./_components/VideoPlayer";
 import { Suspense } from "react";
 import Image from "next/image";
+import Inspector from "./_components/Inspector";
 
 export default function EpisodePage({
   params,
@@ -42,6 +43,7 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
             <VideoPlayer videoUrl={data.episode.fileUrl} />
           </span>
         </div>
+        <Inspector className="mt-8" />
       </div>
     );
 
