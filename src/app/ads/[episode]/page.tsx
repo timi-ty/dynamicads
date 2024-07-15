@@ -4,6 +4,7 @@ import VideoPlayer from "./_components/VideoPlayer";
 import { Suspense } from "react";
 import Image from "next/image";
 import Inspector from "./_components/Inspector";
+import { VideoContextProvider } from "./_context/VideoContext";
 
 export default function EpisodePage({
   params,
@@ -35,15 +36,17 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
             Episode {data.episode.id} • {data.episode.createdAt.toDateString()}
           </span>
         </div>
-        <div className="mt-8 flex flex-row gap-8">
-          <span>
-            <AdMarkers episodeId={data.episode.id} />
-          </span>
-          <span>
-            <VideoPlayer videoUrl={data.episode.fileUrl} />
-          </span>
-        </div>
-        <Inspector className="mt-8" />
+        <VideoContextProvider>
+          <div className="mt-8 flex flex-row gap-8">
+            <span>
+              <AdMarkers episodeId={data.episode.id} />
+            </span>
+            <span>
+              <VideoPlayer videoUrl={data.episode.fileUrl} />
+            </span>
+          </div>
+          <Inspector className="mt-8" />
+        </VideoContextProvider>
       </div>
     );
 

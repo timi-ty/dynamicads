@@ -1,40 +1,24 @@
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect } from "react";
-
-// This hook operates at a global scope.
-// Any consumer of this hook controls the singular video element in this app.
-// If this app was more complex, it would be wise to have an instance pool where different consumers can refer to different video elements to control.
-// This could also be designed using React Context, but the atomic hook approach is preferred here.
-// Controls override each other based on who acted last. The last consumer to trigger a control is always authoritative.
-
-const videoAtom = atom<HTMLVideoElement | null>(null);
-const isPausedAtom = atom(true);
-const isRewindingAtom = atom(false);
-const isFastforwardingAtom = atom(false);
-const rewindHandleAtom = atom(0);
-const fastforwardHandleAtom = atom(0);
-export const videoLengthAtom = atom(0);
-export const videoTimeAtom = atom(0);
+import { createContext, useEffect, useRef, useState } from "react";
+import { clamp } from "~/utils/math";
 
 // This entire hook has to handle the case where the video element is not yet mounted and the controls do nothing.
 // A null check is performed before any operation.
-export function useVideoControls() {
-  const video = useAtomValue(videoAtom);
-
+export function useVideoControls(
+  video: HTMLVideoElement | null,
+): VideoControls {
   // These are data points only. Setting isPaused to true does not pause the video, but isPaused becomes true when the video is paused.
-  const [isPaused, setIsPaused] = useAtom(isPausedAtom);
-  const [videoLength, setVideoLength] = useAtom(videoLengthAtom);
-  const [videoTime, setVideoTime] = useAtom(videoTimeAtom);
+  const [isPaused, setIsPaused] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [videoLength, setVideoLength] = useState(0);
+  const [videoTime, setVideoTime] = useState(0);
 
   // These are data with actions (side effects). They do what the say.
-  const [isRewinding, setIsRewinding] = useAtom(isRewindingAtom);
-  const [isFastforwarding, setIsFastforwarding] = useAtom(isFastforwardingAtom);
+  const [isRewinding, setIsRewinding] = useState(false);
+  const [isFastforwarding, setIsFastforwarding] = useState(false);
 
   // These are handles for window.setInterval() calls.
-  const [rewindHandle, setRewindHandle] = useAtom(rewindHandleAtom);
-  const [fastforwardHandle, setFastforwardHandle] = useAtom(
-    fastforwardHandleAtom,
-  );
+  const rewindHandle = useRef<number | null>(null);
+  const fastforwardHandle = useRef<number | null>(null);
 
   useEffect(() => {
     if (!video) return;
@@ -54,18 +38,28 @@ export function useVideoControls() {
     }
     function handleTimeUpdate() {
       setVideoTime(currentVideo.currentTime);
+      setIsBuffering(false);
     }
+    function handleWaiting() {
+      currentVideo.play(); // Only a currently playing video is considered as buffering.
+      setIsBuffering(true);
+    }
+    // Immediately call these two in case they are set before the effect runs.
+    setVideoLength(currentVideo.duration);
+    setVideoTime(currentVideo.currentTime);
     currentVideo.addEventListener("play", handlePlay);
     currentVideo.addEventListener("pause", handlePause);
     currentVideo.addEventListener("ended", handlePause);
     currentVideo.addEventListener("durationchange", handleDurationChange);
     currentVideo.addEventListener("timeupdate", handleTimeUpdate);
+    currentVideo.addEventListener("waiting", handleWaiting);
     return () => {
       currentVideo.removeEventListener("play", handlePlay);
       currentVideo.removeEventListener("pause", handlePause);
       currentVideo.removeEventListener("ended", handlePause);
       currentVideo.removeEventListener("durationchange", handleDurationChange);
       currentVideo.removeEventListener("timeupdate", handleTimeUpdate);
+      currentVideo.removeEventListener("waiting", handleWaiting);
     };
   }, [video]);
 
@@ -73,20 +67,20 @@ export function useVideoControls() {
   useEffect(() => {
     if (!video) return;
     if (!isRewinding) {
-      window.clearInterval(rewindHandle);
+      if (rewindHandle.current) window.clearInterval(rewindHandle.current);
       return;
     }
 
     video.pause(); // Always pause before rewinding.
     setIsFastforwarding(false); // Cannot fastforward and rewind at the same time.
+    if (rewindHandle.current) window.clearInterval(rewindHandle.current);
     // Kind of x2 rewind. Not really because the rate of setInterval calls is not guaranteed.
-    const handle = window.setInterval(() => {
-      video.currentTime -= 0.5;
-    }, 250);
-    setRewindHandle(handle);
+    rewindHandle.current = window.setInterval(() => {
+      video.currentTime -= 1.0;
+    }, 500);
 
     return () => {
-      window.clearInterval(rewindHandle);
+      if (rewindHandle.current) window.clearInterval(rewindHandle.current);
     };
   }, [isRewinding, video]);
 
@@ -94,20 +88,23 @@ export function useVideoControls() {
   useEffect(() => {
     if (!video) return;
     if (!isFastforwarding) {
-      window.clearInterval(fastforwardHandle);
+      if (fastforwardHandle.current)
+        window.clearInterval(fastforwardHandle.current);
       return;
     }
 
     video.pause(); // Always pause before fastforwarding.
     setIsRewinding(false); // Cannot rewind and fastforward at the same time.
+    if (fastforwardHandle.current)
+      window.clearInterval(fastforwardHandle.current);
     // Kind of x2 fastforward. Not really because the rate of setInterval calls is not guaranteed.
-    const handle = window.setInterval(() => {
-      video.currentTime += 0.5;
-    }, 250);
-    setFastforwardHandle(handle);
+    fastforwardHandle.current = window.setInterval(() => {
+      video.currentTime += 1.0;
+    }, 500);
 
     return () => {
-      window.clearInterval(fastforwardHandle);
+      if (fastforwardHandle.current)
+        window.clearInterval(fastforwardHandle.current);
     };
   }, [isFastforwarding, video]);
 
@@ -115,13 +112,13 @@ export function useVideoControls() {
     if (!video) return;
 
     if (video.paused || video.ended) {
-      video.play();
       setIsRewinding(false); // Every time video plays or pauses, cancel seeking.
       setIsFastforwarding(false);
+      video.play();
     } else {
-      video.pause();
       setIsFastforwarding(false); // Every time video plays or pauses, cancel seeking.
       setIsFastforwarding(false);
+      video.pause();
     }
   }
 
@@ -163,8 +160,19 @@ export function useVideoControls() {
     video.currentTime = video.duration;
   }
 
+  function seek(time: number) {
+    if (!video) return;
+
+    const seekTime = clamp(time, 0, video.duration);
+
+    video.pause();
+    video.currentTime = seekTime;
+  }
+
   return {
     isPaused,
+    isBuffering,
+    isReady: videoLength > 0,
     videoTime,
     videoLength,
     togglePlay,
@@ -176,15 +184,24 @@ export function useVideoControls() {
     toggleFastforward,
     jumpToStart,
     jumpToEnd,
+    seek,
   };
 }
 
-export function useThisVideoControls(video: HTMLVideoElement) {
-  const setVideo = useSetAtom(videoAtom);
-
-  useEffect(() => {
-    setVideo(video);
-  }, []);
-
-  return useVideoControls();
-}
+export type VideoControls = {
+  isPaused: boolean;
+  isBuffering: boolean;
+  isReady: boolean;
+  videoTime: number;
+  videoLength: number;
+  togglePlay: () => void;
+  plusSeconds: (seconds: number) => void;
+  minusSeconds: (seconds: number) => void;
+  isRewinding: boolean;
+  isFastforwarding: boolean;
+  toggleRewind: () => void;
+  toggleFastforward: () => void;
+  jumpToStart: () => void;
+  jumpToEnd: () => void;
+  seek: (seconds: number) => void;
+};

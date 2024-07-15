@@ -1,21 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { useThisVideoControls } from "../_hooks/useVideoControls";
+import { useContext, useEffect, useRef } from "react";
+import VideoContext from "../_context/VideoContext";
+import { VideoControls } from "../_hooks/useVideoControls";
 
 export default function VideoPlayer({
   className,
   videoUrl,
 }: Readonly<{ className?: string; videoUrl: string }>) {
+  const videoContext = useContext(VideoContext);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasVideo, setHasVideo] = useState(
-    videoRef.current !== null && videoRef.current !== undefined,
-  );
 
-  // This effect helps ensure that controls only render when video element is available.
+  // This effect sets the video for the current context tree.
   useEffect(() => {
-    setHasVideo(videoRef.current !== null && videoRef.current !== undefined);
+    if (videoRef.current) {
+      videoContext.setVideo(videoRef.current);
+    }
   }, [videoRef.current]);
 
   return (
@@ -26,18 +27,16 @@ export default function VideoPlayer({
           src={videoUrl}
           className="h-[408px] w-full rounded-lg bg-zinc-900"
         />
-        {hasVideo && videoRef.current && (
-          <VideoControls video={videoRef.current} />
-        )}
+        <VideoControlsView controls={videoContext.controls} />
       </div>
     </div>
   );
 }
 
-function VideoControls({
+function VideoControlsView({
   className,
-  video,
-}: Readonly<{ className?: string; video: HTMLVideoElement }>) {
+  controls,
+}: Readonly<{ className?: string; controls: VideoControls }>) {
   const {
     isPaused,
     togglePlay,
@@ -47,13 +46,15 @@ function VideoControls({
     toggleFastforward,
     jumpToStart,
     jumpToEnd,
-  } = useThisVideoControls(video);
+    isRewinding,
+    isFastforwarding,
+  } = controls;
 
   return (
     <div className={className}>
       <div className="flex h-16 flex-row items-center justify-between rounded-2xl border bg-white p-4 text-sm font-semibold text-zinc-500 shadow">
         <button
-          className="flex flex-row items-center gap-2"
+          className="group flex flex-row items-center gap-2 rounded-xl p-2 active:text-zinc-900"
           onClick={jumpToStart}
           type="button"
         >
@@ -62,64 +63,77 @@ function VideoControls({
             alt="jump to start"
             width={32}
             height={32}
-            className="rounded-full border p-2"
+            className="rounded-full border p-2 group-active:bg-zinc-100"
           />
           <span>Jump to start</span>
         </button>
         <span className="flex flex-row items-center gap-8">
-          <span className="flex flex-row items-center gap-2">
+          <button
+            className="group flex flex-row items-center gap-2 active:text-zinc-900"
+            onClick={() => minusSeconds(10)}
+          >
             <Image
               src="/ic_anticlockwise.svg"
-              alt="+10s"
+              alt="-10s"
               width={20}
               height={20}
-              onClick={() => minusSeconds(10)}
+              className="rounded-full group-active:bg-zinc-100"
             />
             <span>10s</span>
-          </span>
-          <Image
-            src="/ic_rewind.svg"
-            alt="rewind"
-            width={20}
-            height={20}
+          </button>
+          <button
             onClick={toggleRewind}
-          />
-          <Image
-            src={isPaused ? "/ic_play.svg" : "/ic_pause.svg"}
-            alt={isPaused ? "play" : "pause"}
-            width={32}
-            height={32}
-            onClick={togglePlay}
-          />
-          <Image
-            src="/ic_fastforward.svg"
-            alt="fastforward"
-            width={20}
-            height={20}
+            className={`${isRewinding ? "bg-zinc-100 shadow" : ""} rounded-full p-2`}
+          >
+            <Image src="/ic_rewind.svg" alt="rewind" width={20} height={20} />
+          </button>
+          <button onClick={togglePlay}>
+            <Image
+              src={isPaused ? "/ic_play.svg" : "/ic_pause.svg"}
+              alt={isPaused ? "play" : "pause"}
+              width={32}
+              height={32}
+            />
+          </button>
+          <button
             onClick={toggleFastforward}
-          />
-          <span className="flex flex-row items-center gap-2">
+            className={`${isFastforwarding ? "bg-zinc-100 shadow" : ""} rounded-full p-2`}
+          >
+            <Image
+              src="/ic_fastforward.svg"
+              alt="fastforward"
+              width={20}
+              height={20}
+            />
+          </button>
+          <button
+            className="group flex flex-row items-center gap-2 active:text-zinc-900"
+            onClick={() => plusSeconds(10)}
+          >
+            <span>10s</span>
             <Image
               src="/ic_clockwise.svg"
               alt="+10s"
               width={20}
               height={20}
-              onClick={() => plusSeconds(10)}
+              className="rounded-full group-active:bg-zinc-100"
             />
-            <span>10s</span>
-          </span>
+          </button>
         </span>
-        <span className="flex flex-row items-center gap-2">
+        <button
+          className="group flex flex-row items-center gap-2 rounded-xl p-2 active:text-zinc-900"
+          onClick={jumpToEnd}
+          type="button"
+        >
           <span>Jump to end</span>
           <Image
             src="/ic_arrow-line-right.svg"
-            alt="jump to end"
+            alt="jump to start"
             width={32}
             height={32}
-            className="rounded-full border p-2"
-            onClick={jumpToEnd}
+            className="rounded-full border p-2 group-active:bg-zinc-100"
           />
-        </span>
+        </button>
       </div>
     </div>
   );
