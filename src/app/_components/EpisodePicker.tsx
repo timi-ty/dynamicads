@@ -5,20 +5,14 @@ import withDropdown from "../_generic_components/withDrodpdown";
 import { api } from "~/trpc/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { atomWithStorage } from "jotai/utils";
+import { useAtom } from "jotai";
+
+const pickedEpisodeAtom = atomWithStorage("picked_episode", 0);
 
 export default function EpisodePicker() {
   const { data, error } = api.episode.getAll.useQuery();
-  const [initialSelection, setInitialSelection] = useState<number>();
-
-  // Everytime we get updated data, get the selected episode from local storage.
-  useEffect(() => {
-    const savedSelected = localStorage.getItem("selected_episode_id");
-    if (!savedSelected) return;
-    const id = parseInt(savedSelected);
-    const initialEpisode = data?.episodes?.find((episode) => episode.id === id);
-    // We only want to use our local storage selection if it still points to an existing episode
-    if (initialEpisode) setInitialSelection(id);
-  }, [data]);
+  const [pickedEpisode, setPickedEpisode] = useAtom(pickedEpisodeAtom);
 
   if (error || (data && data.error)) return <EpisodeEmpty hasError={true} />;
 
@@ -26,10 +20,9 @@ export default function EpisodePicker() {
     return (
       <EpisodeDropdown
         items={data.episodes}
-        selectedId={initialSelection}
+        pickedItemId={pickedEpisode}
         onSelectItem={(item) => {
-          // We can use local storage here becuase it is a user triggered event only.
-          localStorage.setItem("selected_episode_id", item.id.toString());
+          setPickedEpisode(item.id);
         }}
       />
     );

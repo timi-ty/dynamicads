@@ -18,12 +18,12 @@ export default function withDropdown<T extends { id: K }, K>(
 ) {
   return ({
     items,
-    selectedId,
+    pickedItemId,
     onSelectItem,
     className,
   }: Readonly<{
     items: T[];
-    selectedId?: K;
+    pickedItemId?: K;
     onSelectItem?: (selected: T) => void;
     className?: string;
   }>) => {
@@ -31,10 +31,11 @@ export default function withDropdown<T extends { id: K }, K>(
     const [selectedItem, setSelectedItem] = useState(items[0]);
 
     useEffect(() => {
-      // selectedId can be undefined in which case it does nothing
-      if (!selectedId) return;
-      setSelectedItem(items.find((item) => item.id === selectedId));
-    }, [selectedId]);
+      const pickedItem = items.find((item) => item.id === pickedItemId);
+      // pickedItem can be undefined in which case it does nothing
+      if (!pickedItem) return;
+      setSelectedItem(pickedItem);
+    }, [pickedItemId]);
 
     return (
       <div className={className} onClick={() => setIsExpanded((x) => !x)}>
