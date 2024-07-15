@@ -22,12 +22,18 @@ export default function VideoPlayer({
   return (
     <div className={className}>
       <div className="flex h-[552px] w-[788px] flex-col justify-between rounded-2xl border bg-white p-8 shadow">
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          className="h-[408px] w-full rounded-lg bg-zinc-900"
+        <div className="relative w-full">
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            className="h-[408px] w-full rounded-lg bg-zinc-900"
+          />
+          {videoContext.controls.isBuffering && <VideoBuffererView />}
+        </div>
+        <VideoControlsView
+          controls={videoContext.controls}
+          disabled={!videoContext.controls.isReady}
         />
-        <VideoControlsView controls={videoContext.controls} />
       </div>
     </div>
   );
@@ -36,7 +42,12 @@ export default function VideoPlayer({
 function VideoControlsView({
   className,
   controls,
-}: Readonly<{ className?: string; controls: VideoControls }>) {
+  disabled,
+}: Readonly<{
+  className?: string;
+  controls: VideoControls;
+  disabled?: boolean;
+}>) {
   const {
     isPaused,
     togglePlay,
@@ -52,7 +63,9 @@ function VideoControlsView({
 
   return (
     <div className={className}>
-      <div className="flex h-16 flex-row items-center justify-between rounded-2xl border bg-white p-4 text-sm font-semibold text-zinc-500 shadow">
+      <div
+        className={`flex h-16 flex-row items-center justify-between rounded-2xl border bg-white p-4 text-sm font-semibold text-zinc-500 shadow ${disabled ? "pointer-events-none opacity-30" : ""}`}
+      >
         <button
           className="group flex flex-row items-center gap-2 rounded-xl p-2 active:text-zinc-900"
           onClick={jumpToStart}
@@ -135,6 +148,20 @@ function VideoControlsView({
           />
         </button>
       </div>
+    </div>
+  );
+}
+
+function VideoBuffererView() {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 top-0 flex w-full flex-row items-center justify-center rounded-lg bg-black bg-opacity-20">
+      <Image
+        src="/spinner_dots.svg"
+        alt="buffering video"
+        width={48}
+        height={48}
+        className="relative opacity-80"
+      />
     </div>
   );
 }

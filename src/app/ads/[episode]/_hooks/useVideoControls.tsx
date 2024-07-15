@@ -75,6 +75,7 @@ export function useVideoControls(
     setIsFastforwarding(false); // Cannot fastforward and rewind at the same time.
     if (rewindHandle.current) window.clearInterval(rewindHandle.current);
     // Kind of x2 rewind. Not really because the rate of setInterval calls is not guaranteed.
+    // This is not a very good implentation but negative playback rate is not supported.
     rewindHandle.current = window.setInterval(() => {
       video.currentTime -= 1.0;
     }, 500);
@@ -98,6 +99,7 @@ export function useVideoControls(
     if (fastforwardHandle.current)
       window.clearInterval(fastforwardHandle.current);
     // Kind of x2 fastforward. Not really because the rate of setInterval calls is not guaranteed.
+    // This is not a very good implentation but negative playback rate is not supported.
     fastforwardHandle.current = window.setInterval(() => {
       video.currentTime += 1.0;
     }, 500);
