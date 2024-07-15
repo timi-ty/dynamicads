@@ -6,7 +6,8 @@ import Link from "next/link";
 
 export default function TopNav({
   className,
-}: Readonly<{ className?: string }>) {
+  userName,
+}: Readonly<{ className?: string; userName: string }>) {
   return (
     <nav className={className}>
       <div className="flex flex-row items-center justify-between p-16 pb-6 pt-6">
@@ -31,7 +32,9 @@ export default function TopNav({
               height={20}
             />
           </button>
-          <ProfileDropDown items={[{ id: "profile" }, { id: "signout" }]} />
+          <ProfileDropDown
+            items={[{ id: "profile", value: userName }, { id: "signout" }]}
+          />
         </div>
       </div>
     </nav>
@@ -41,7 +44,7 @@ export default function TopNav({
 function ProfileDropdownItem({
   data,
   isPicker,
-}: Readonly<{ data: { id: string }; isPicker?: boolean }>) {
+}: Readonly<{ data: { id: string; value?: string }; isPicker?: boolean }>) {
   // Only show profile item if it is the picker
   if (data.id === "profile" && !isPicker) return <></>;
   // Regardless of the selected item, return the profile item as the picker item.
@@ -54,7 +57,7 @@ function ProfileDropdownItem({
           width={32}
           height={32}
         />
-        <div>Emma Warren</div>
+        <div>{data.value}</div>
         <Image
           src={"/ic_chevron-down.svg"}
           alt="settings"

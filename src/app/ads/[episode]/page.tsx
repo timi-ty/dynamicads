@@ -19,8 +19,6 @@ export default function EpisodePage({
 async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
   const data = await api.episode.get({ id: episodeId });
 
-  console.log(data, "id:", episodeId);
-
   if (!data || (data && data.error))
     return (
       <div className="flex h-full flex-row items-center justify-center text-zinc-500">

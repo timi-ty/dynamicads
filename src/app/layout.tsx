@@ -31,7 +31,10 @@ export default async function RootLayout({
             <HydrateClient>
               {session && (
                 <>
-                  <TopNav className="top-nav z-10 overflow-visible border-b bg-zinc-50" />
+                  <TopNav
+                    className="top-nav z-10 overflow-visible border-b bg-zinc-50"
+                    userName={session.user.name}
+                  />
                   <div className="middle flex flex-row">
                     <SideNav className="h-full flex-shrink-0 overflow-y-auto border-r bg-zinc-50" />
                     <main className="h-full flex-grow overflow-auto bg-zinc-50 p-16">

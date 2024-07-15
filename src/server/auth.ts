@@ -16,6 +16,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      name: string;
     };
   }
 }
@@ -27,11 +28,12 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, token }) => {
+    session: (params) => {
       return {
-        ...session,
+        ...params.session,
         user: {
-          id: token.sub || "",
+          id: params.token.sub || "",
+          name: params.session.user.name,
         },
       };
     },
@@ -61,7 +63,7 @@ export const authOptions: NextAuthOptions = {
           // Verify the user if they exist.
           if (user) {
             return user.password === credentials.password
-              ? { id: user.id }
+              ? { id: user.id, name: user.username }
               : null;
           } else {
             // Create a new user if they don't exist
@@ -71,7 +73,7 @@ export const authOptions: NextAuthOptions = {
                 password: credentials.password,
               },
             });
-            return { id: newUser.id };
+            return { id: newUser.id, name: newUser.username };
           }
         } catch (e) {
           console.log(e);

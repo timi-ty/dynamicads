@@ -8,7 +8,7 @@ import { api } from "~/trpc/react";
 
 export default function AdsPage() {
   const router = useRouter();
-  const { data, error } = api.episode.getAll.useQuery();
+  const { data, error, isLoading } = api.episode.getAll.useQuery();
   const [pickedEpisodeId, setPickedEpisodeId] = usePickedEpisodeId();
 
   useEffect(() => {
@@ -34,7 +34,13 @@ export default function AdsPage() {
 
   if (error || (data && data.error)) return <Error />;
 
-  return <Loader />;
+  if (isLoading) return <Loader />;
+
+  return (
+    <div className="flex h-full flex-row items-center justify-center text-zinc-500">
+      <span>No Episode here.</span>
+    </div>
+  );
 }
 
 function Loader() {
