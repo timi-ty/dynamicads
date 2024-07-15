@@ -24,6 +24,7 @@ export const markerRouter = createTRPCRouter({
             episode: { connect: { id: input.episodeId } },
             type: input.type,
             value: input.value,
+            createdById: ctx.session.user.id,
           },
         });
         return;
@@ -46,7 +47,7 @@ export const markerRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.db.marker.update({
-          where: { id: input.markerId },
+          where: { id: input.markerId, createdById: ctx.session.user.id },
           data: {
             type: input.type,
           },
@@ -67,7 +68,10 @@ export const markerRouter = createTRPCRouter({
       try {
         const markers = await ctx.db.marker.findMany({
           orderBy: { createdAt: "asc" },
-          where: { episodeId: input.episodeId },
+          where: {
+            episodeId: input.episodeId,
+            createdById: ctx.session.user.id,
+          },
         });
         return { markers: markers };
       } catch (e) {
@@ -80,7 +84,7 @@ export const markerRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.db.marker.delete({
-          where: { id: input.markerId },
+          where: { id: input.markerId, createdById: ctx.session.user.id },
         });
         return;
       } catch (e: any) {

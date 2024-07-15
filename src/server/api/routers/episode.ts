@@ -27,7 +27,9 @@ export const episodeRouter = createTRPCRouter({
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
     try {
-      const episodes = await ctx.db.episode.findMany();
+      const episodes = await ctx.db.episode.findMany({
+        where: { createdById: ctx.session.user.id },
+      });
       return { episodes: episodes };
     } catch (e) {
       return { error: "internal server error" };

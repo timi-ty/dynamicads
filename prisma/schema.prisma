@@ -44,8 +44,9 @@ model Marker {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    episode   Episode @relation(fields: [episodeId], references: [id])
-    episodeId Int
+    episode     Episode @relation(fields: [episodeId], references: [id])
+    episodeId   Int
+    createdById String
 
     type  String
     value Int
