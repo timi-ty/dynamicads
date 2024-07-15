@@ -52,7 +52,7 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
 
   return (
     <div className="flex h-full flex-row items-center justify-center text-zinc-500">
-      <span>No episode.</span>
+      <span>Not an episode.</span>
     </div>
   );
 }

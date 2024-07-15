@@ -13,7 +13,7 @@ export default function SideNav({
     <nav className={className}>
       <div className="w-80 p-8">
         <CreateEpisodeButton />
-        <EpisodePicker />
+        <EpisodePicker className="mt-4" />
         <div className="mt-8 flex flex-col gap-8 pe-8 ps-8">
           <div className="flex flex-row items-center gap-4">
             <Image src={"/ic_home.svg"} alt="logo" width={20} height={20} />

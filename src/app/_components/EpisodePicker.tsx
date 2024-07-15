@@ -4,32 +4,34 @@ import Image from "next/image";
 import withDropdown from "../_generic_components/withDrodpdown";
 import { api } from "~/trpc/react";
 import Link from "next/link";
-import { atomWithStorage } from "jotai/utils";
-import { useAtom } from "jotai";
+import usePickedEpisodeId from "../_hooks/usePickedEpisodeId";
 
-const pickedEpisodeAtom = atomWithStorage("picked_episode", 0);
-
-export default function EpisodePicker() {
+export default function EpisodePicker({
+  className,
+}: Readonly<{ className?: string }>) {
   const { data, error } = api.episode.getAll.useQuery();
-  const [pickedEpisode, setPickedEpisode] = useAtom(pickedEpisodeAtom);
+  const [pickedEpisodeId, setPickedEpisodeId] = usePickedEpisodeId();
 
-  if (error || (data && data.error)) return <EpisodeEmpty hasError={true} />;
+  if (error || (data && data.error))
+    return <EpisodeItemEmpty className={className} hasError={true} />;
 
   if (data && data.episodes && data.episodes.length > 0)
     return (
       <EpisodeDropdown
+        className={className}
         items={data.episodes}
-        pickedItemId={pickedEpisode}
+        pickedItemId={pickedEpisodeId}
         onSelectItem={(item) => {
-          setPickedEpisode(item.id);
+          // We could navigate here with a next router but we use a Link instead in the EpisodeItem.
+          setPickedEpisodeId(item.id);
         }}
       />
     );
 
-  return <EpisodeEmpty />;
+  return <EpisodeItemEmpty className={className} />;
 }
 
-function EpisodeItem({
+function EpisodeDropdownItem({
   data,
   isSelected,
   isPicker,
@@ -44,9 +46,9 @@ function EpisodeItem({
   const link = `/ads/${data.id}`;
   return (
     <Link
-      href={link}
+      href={isPicker ? "" : link} // We don't want the picker to do the link action.
       type="button"
-      className={`mt-4 flex w-64 flex-row items-center justify-between rounded-md p-4 pb-3 pt-3 text-sm font-medium ${isSelected ? "border-2 border-zinc-900" : "border"} ${isPicker && isExpanded ? "shadow" : ""}`}
+      className={`flex w-64 flex-row items-center justify-between rounded-md bg-zinc-50 p-4 pb-3 pt-3 text-sm font-medium ${isSelected ? "border-2 border-zinc-900" : "border"} ${isPicker && isExpanded ? "shadow" : ""}`}
     >
       <div className="flex flex-row items-center">
         <Image
@@ -71,28 +73,33 @@ function EpisodeItem({
   );
 }
 
-function EpisodeEmpty({ hasError }: Readonly<{ hasError?: boolean }>) {
+function EpisodeItemEmpty({
+  className,
+  hasError,
+}: Readonly<{ className?: string; hasError?: boolean }>) {
   return (
-    <span className="mt-4 flex w-64 flex-row items-center justify-between rounded-md border p-4 pb-3 pt-3 text-sm font-medium">
-      <div className="flex flex-row items-center gap-3">
+    <div className={className}>
+      <span className="flex w-64 flex-row items-center justify-between rounded-md border p-4 pb-3 pt-3 text-sm font-medium">
+        <div className="flex flex-row items-center gap-3">
+          <Image
+            src={"/placeholder_episode-thumbnail.png"}
+            alt="profile"
+            width={32}
+            height={32}
+          />
+          <span className="text-zinc-500">
+            {hasError ? "Error: No episodes" : "No Episodes Here"}
+          </span>
+        </div>
         <Image
-          src={"/placeholder_episode-thumbnail.png"}
-          alt="profile"
-          width={32}
-          height={32}
+          src={"/ic_chevron-down.svg"}
+          alt="settings"
+          width={16}
+          height={16}
         />
-        <span className="text-zinc-500">
-          {hasError ? "Error: No episodes" : "No Episodes Here"}
-        </span>
-      </div>
-      <Image
-        src={"/ic_chevron-down.svg"}
-        alt="settings"
-        width={16}
-        height={16}
-      />
-    </span>
+      </span>
+    </div>
   );
 }
 
-const EpisodeDropdown = withDropdown(EpisodeItem);
+const EpisodeDropdown = withDropdown(EpisodeDropdownItem);

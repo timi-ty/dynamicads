@@ -6,7 +6,7 @@ type IdType<K> = {
   id: K;
 };
 
-type PropsType<T, K> = {
+export type DropdownItemPropsType<T, K> = {
   data: T & IdType<K>;
   isSelected?: boolean;
   isPicker?: boolean;
@@ -14,7 +14,7 @@ type PropsType<T, K> = {
 };
 
 export default function withDropdown<T extends { id: K }, K>(
-  BaseComponent: (props: PropsType<T, K>) => ReactNode,
+  BaseComponent: (props: DropdownItemPropsType<T, K>) => ReactNode,
 ) {
   return ({
     items,
@@ -39,29 +39,33 @@ export default function withDropdown<T extends { id: K }, K>(
 
     return (
       <div className={className} onClick={() => setIsExpanded((x) => !x)}>
-        {selectedItem &&
-          BaseComponent({
-            data: selectedItem,
-            isPicker: true,
-            isExpanded: isExpanded,
-          })}
-        {isExpanded &&
-          items &&
-          items.map((item) => (
-            <div
-              key={item.id as any}
-              onClick={() => {
-                setSelectedItem(item);
-                if (onSelectItem) onSelectItem(item);
-              }}
-            >
-              {BaseComponent({
-                data: item,
-                isSelected: item.id === selectedItem?.id,
-                isExpanded: true,
-              })}
-            </div>
-          ))}
+        <div className="relative">
+          {selectedItem &&
+            BaseComponent({
+              data: selectedItem,
+              isPicker: true,
+              isExpanded: isExpanded,
+            })}
+          <div className="absolute">
+            {isExpanded &&
+              items &&
+              items.map((item) => (
+                <div
+                  key={item.id as any}
+                  onClick={() => {
+                    setSelectedItem(item);
+                    if (onSelectItem) onSelectItem(item);
+                  }}
+                >
+                  {BaseComponent({
+                    data: item,
+                    isSelected: item.id === selectedItem?.id,
+                    isExpanded: true,
+                  })}
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
     );
   };
