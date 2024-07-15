@@ -1,30 +1,36 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { api } from "~/trpc/react";
 import { AdMarkerType } from "~/utils/types";
 import ConfigureAdMarkerModalGroup, {
   ConfigureAdMarkerStatus,
 } from "./ConfigureAdMarker";
+import VideoContext from "../_context/VideoContext";
 
 export default function CreateAdMarkerButtons({
   episodeId,
-  currentScrubberPos,
   className,
+  disabled,
 }: Readonly<{
   episodeId: number;
-  currentScrubberPos: number;
   className?: string;
+  disabled?: boolean;
 }>) {
   const [status, setStatus] = useState<ConfigureAdMarkerStatus>("Done");
   const queryUtils = api.useUtils();
   const createMarker = api.marker.create.useMutation();
+  const videoContext = useContext(VideoContext);
 
   function handleFinish(markerType: AdMarkerType) {
     setStatus("Finishing");
     createMarker.mutate(
-      { type: markerType, value: currentScrubberPos, episodeId: episodeId },
+      {
+        type: markerType,
+        value: Math.floor(videoContext.controls.videoTime * 1000), // Marker values are stored in millis
+        episodeId: episodeId,
+      },
       {
         onSuccess: () => {
           setStatus("Done");
@@ -43,7 +49,9 @@ export default function CreateAdMarkerButtons({
 
   return (
     <div className={className}>
-      <div className="flex flex-col gap-4">
+      <div
+        className={`flex flex-col gap-4 ${disabled ? "pointer-events-none opacity-30" : ""}`}
+      >
         <button
           className="font-inter flex w-full flex-row items-center justify-center gap-2 rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-sm font-medium text-zinc-50"
           onClick={() => {

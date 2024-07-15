@@ -5,6 +5,8 @@ import CreateAdMarkerButtons from "./CreateAdMarker";
 import { AdMarkerType } from "~/utils/types";
 import AdMarkerItem from "./AdMarkerItem";
 import { api } from "~/trpc/react";
+import { useContext } from "react";
+import VideoContext from "../_context/VideoContext";
 
 export default function AdMarkers({
   className,
@@ -26,6 +28,7 @@ function AdMarkersCard({
   episodeId: number;
 }>) {
   const { data, error } = api.marker.getAll.useQuery({ episodeId: episodeId });
+  const videoContext = useContext(VideoContext);
 
   if (error || (data && data.error))
     return (
@@ -62,7 +65,7 @@ function AdMarkersCard({
         <CreateAdMarkerButtons
           className="pe-8 ps-8"
           episodeId={episodeId}
-          currentScrubberPos={1000}
+          disabled={!videoContext.controls.isReady}
         />
       </div>
     );
