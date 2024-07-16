@@ -46,7 +46,7 @@ export default function AdMarkerItem({
       { markerId: id },
       {
         onSettled: () => {
-          queryUtils.marker.invalidate();
+          queryUtils.marker.getAll.invalidate();
         },
       },
     );

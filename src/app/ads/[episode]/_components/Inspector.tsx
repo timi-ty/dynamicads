@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChangeEvent, useContext, useState } from "react";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import Scrubber, { ScrubberLoader } from "./Scrubber";
+import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
 
 export default function Inspector({
   className,
@@ -47,29 +48,44 @@ function Controls({
 }>) {
   const videoContext = useContext(EpisodeVideoContext);
   const videoTime = videoContext.controls.videoTime;
+  const { canUndo, canRedo, undoAction, redoAction } = useGlobalActionStack();
 
   return (
     <div className="flex flex-row items-center justify-between text-zinc-500">
       <div className="flex flex-row items-center gap-12 text-sm">
-        <button className="flex flex-row items-center gap-3" type="button">
+        <button
+          className={`group flex flex-row items-center gap-3 ${canUndo ? "" : "opacity-60"}`}
+          type="button"
+          disabled={!canUndo}
+          onClick={undoAction}
+        >
           <Image
             src="/ic_arrow-anticlockwise.svg"
             alt="undo"
             width={32}
             height={32}
-            className="rounded-full border p-2"
+            className={`rounded-full border p-2 ${canUndo ? "group-active:bg-zinc-100" : ""}`}
           />
-          <span>Undo</span>
+          <span className={`${canUndo ? "group-active:text-zinc-900" : ""}`}>
+            Undo
+          </span>
         </button>
-        <button className="flex flex-row items-center gap-3" type="button">
+        <button
+          className={`group flex flex-row items-center gap-3 ${canRedo ? "" : "opacity-60"}`}
+          type="button"
+          disabled={!canRedo}
+          onClick={redoAction}
+        >
           <Image
             src="/ic_arrow-clockwise.svg"
             alt="redo"
             width={32}
             height={32}
-            className="rounded-full border p-2"
+            className={`rounded-full border p-2 ${canRedo ? "group-active:bg-zinc-100" : ""}`}
           />
-          <span>Redo</span>
+          <span className={`${canRedo ? "group-active:text-zinc-900" : ""}`}>
+            Redo
+          </span>
         </button>
       </div>
       <span className="rounded-md border p-3 pb-2 pt-2">

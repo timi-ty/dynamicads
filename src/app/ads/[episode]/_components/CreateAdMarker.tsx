@@ -8,6 +8,7 @@ import ConfigureAdMarkerModalGroup, {
   ConfigureAdMarkerStatus,
 } from "./ConfigureAdMarker";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
+import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
 
 export default function CreateAdMarkerButtons({
   episodeId,
@@ -21,26 +22,43 @@ export default function CreateAdMarkerButtons({
   const [status, setStatus] = useState<ConfigureAdMarkerStatus>("Done");
   const queryUtils = api.useUtils();
   const createMarker = api.marker.create.useMutation();
+  const deleteMarker = api.marker.delete.useMutation();
   const videoContext = useContext(EpisodeVideoContext);
+  const { doAction } = useGlobalActionStack();
 
   function handleFinish(markerType: AdMarkerType) {
-    setStatus("Finishing");
-    createMarker.mutate(
-      {
+    async function primary() {
+      setStatus("Finishing");
+      const marker = await createMarker.mutateAsync({
         type: markerType,
         value: Math.floor(videoContext.scrubberTime * 1000), // Marker values are stored in millis
         episodeId: episodeId,
-      },
-      {
-        onSuccess: () => {
-          setStatus("Done");
-          queryUtils.marker.getAll.invalidate();
+      });
+      if (marker.error || !marker.marker) {
+        setStatus("Error");
+        // Failed to create marker, this situation is not reversible.
+        return null;
+      } else {
+        setStatus("Done");
+        queryUtils.marker.getAll.invalidate();
+      }
+
+      return { markerId: marker.marker.id };
+    }
+    function revert(params?: { markerId: number }) {
+      if (!params) return; // Did not get the needed parameters, can't revert.
+
+      console.log("reverting create:", params.markerId);
+      deleteMarker.mutate(
+        { markerId: params.markerId },
+        {
+          onSettled: () => {
+            queryUtils.marker.getAll.invalidate();
+          },
         },
-        onError: () => {
-          setStatus("Error");
-        },
-      },
-    );
+      );
+    }
+    doAction(primary, revert);
   }
 
   function handleDismiss() {

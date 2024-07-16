@@ -19,7 +19,7 @@ export const markerRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.db.marker.create({
+        const marker = await ctx.db.marker.create({
           data: {
             episode: { connect: { id: input.episodeId } },
             type: input.type,
@@ -27,7 +27,7 @@ export const markerRouter = createTRPCRouter({
             createdById: ctx.session.user.id,
           },
         });
-        return;
+        return { marker: marker };
       } catch (e) {
         return { error: "internal server error" };
       }
