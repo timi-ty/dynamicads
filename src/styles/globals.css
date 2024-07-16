@@ -7,6 +7,18 @@
     font-family: "Inter";
   }
 
+  .link {
+    @apply stroke-zinc-500 text-zinc-500;
+  }
+
+  .link:hover {
+    @apply stroke-zinc-900 text-zinc-900;
+  }
+
+  .activeLink {
+    @apply stroke-zinc-900 text-zinc-900;
+  }
+
   /*Primary layout is done here to show how they relate to each other and so that we can use calc.*/
 
   .top-nav {

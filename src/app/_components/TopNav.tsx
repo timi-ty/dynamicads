@@ -15,21 +15,23 @@ export default function TopNav({
           <Image src={"/ic_brandmark.svg"} alt="logo" width={24} height={24} />
           <div className="text-2xl">Vidpod</div>
         </div>
-        <div className="flex flex-row items-center gap-8">
-          <button>
+        <div className="flex flex-row items-center gap-6">
+          <button className="rounded-full hover:bg-zinc-100">
             <Image
               src={"/ic_settings.svg"}
               alt="settings"
-              width={20}
-              height={20}
+              width={28}
+              height={28}
+              className="p-1"
             />
           </button>
-          <button>
+          <button className="rounded-full hover:bg-zinc-100">
             <Image
               src={"/ic_bell-dot.svg"}
               alt="notifications"
-              width={20}
-              height={20}
+              width={28}
+              height={28}
+              className="p-1"
             />
           </button>
           <ProfileDropDown
@@ -50,7 +52,7 @@ function ProfileDropdownItem({
   // Regardless of the selected item, return the profile item as the picker item.
   if (isPicker)
     return (
-      <button className="flex flex-row items-center gap-4 rounded-lg border p-4 pb-3 pt-3 shadow">
+      <button className="flex flex-row items-center gap-4 rounded-lg border p-4 pb-3 pt-3 shadow hover:shadow-md">
         <Image
           src={"/placeholder_profile.png"}
           alt="profile"
@@ -72,7 +74,7 @@ function ProfileDropdownItem({
     return (
       <Link
         href={"/api/auth/signout"}
-        className="z-50 flex flex-row items-center gap-4 rounded-lg border p-4 pb-3 pt-3 shadow"
+        className="z-50 flex flex-row items-center gap-4 rounded-lg border bg-zinc-50 p-4 pb-3 pt-3 shadow"
       >
         <div>Sign out</div>
       </Link>

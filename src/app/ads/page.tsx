@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import usePickedEpisodeId from "../_hooks/usePickedEpisodeId";
 import { api } from "~/trpc/react";
+import CreateEpisodeButton from "../_components/CreateEpisode";
 
 export default function AdsPage() {
   const router = useRouter();
@@ -37,8 +38,9 @@ export default function AdsPage() {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex h-full flex-row items-center justify-center text-zinc-500">
+    <div className="flex h-full flex-col items-center justify-center gap-4 text-zinc-500">
       <span>No Episode here.</span>
+      <CreateEpisodeButton />
     </div>
   );
 }

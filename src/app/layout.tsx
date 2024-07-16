@@ -10,6 +10,7 @@ import TopNav from "./_components/TopNav";
 import ModalOverlay from "./_generic_components/ModalOverlay";
 import { getServerAuthSession } from "~/server/auth";
 import AtomProvider from "~/jotai/react";
+import { NextRequest } from "next/server";
 
 const manrope = Manrope({ subsets: ["latin"], weight: "700" });
 
