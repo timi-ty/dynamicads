@@ -16,6 +16,9 @@ export interface EpisodeVideoConsumer {
   setVideo: (video: HTMLVideoElement | null) => void;
   controls: VideoControls;
   episode: Episode;
+  scrubberTime: number /* Scrubber time may differ from video time while the seek is settling. 
+  The video context allows injection and consumption of an arbitrary scrubber time.*/;
+  publishScrubberTime: (time: number) => void;
 }
 
 export function EpisodeVideoContextProvider({
@@ -23,10 +26,17 @@ export function EpisodeVideoContextProvider({
   children,
 }: Readonly<{ episode: Episode; children: ReactNode }>) {
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
+  const [scrubberTime, setScrubberTime] = useState(0);
   const videoControls = useVideoControls(video);
   return (
     <EpisodeVideoContext.Provider
-      value={{ setVideo: setVideo, controls: videoControls, episode: episode }}
+      value={{
+        setVideo: setVideo,
+        controls: videoControls,
+        episode: episode,
+        scrubberTime: scrubberTime,
+        publishScrubberTime: (time) => setScrubberTime(time),
+      }}
     >
       {children}
     </EpisodeVideoContext.Provider>
@@ -77,6 +87,10 @@ const defaultConsumer: EpisodeVideoConsumer = {
     createdById: "",
     name: "",
     videoUrl: "",
+  },
+  scrubberTime: 0,
+  publishScrubberTime: function (time: number): void {
+    throw new Error("Function not implemented.");
   },
 };
 

@@ -9,8 +9,9 @@ import { api } from "~/trpc/react";
 const scrubberLengthPerSecondPerZoom = 121; // px
 
 export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
-  const videoContext = useContext(EpisodeVideoContext);
-  const { videoLength, videoTime, seek } = videoContext.controls;
+  const { controls: videoControls, publishScrubberTime } =
+    useContext(EpisodeVideoContext);
+  const { videoLength, videoTime, seek } = videoControls;
   // The pink area is the important part of the scrubber. It is the part that matches theh video length.
   const pinkAreaRef = useRef<HTMLDivElement>(null);
   const { relativeMousePos } = useRelativeMousePos(pinkAreaRef.current);
@@ -31,12 +32,14 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
     setLastSeekPosition(relativeMousePos.x); // We cache this to prevent the thumb from jumping to an old position while the seek is processing.
     let seekPoint = (relativeMousePos.x / pinkAreaWidth) * videoLength;
     seekPoint = clamp(seekPoint, 0, videoLength);
+    publishScrubberTime(seekPoint); // Make the scrubber time available even before seek settles.
     seek(seekPoint);
   }
 
   // When we get an updated video time, it means the seek has settled.
   useEffect(() => {
     setIsSeekSettled(true);
+    publishScrubberTime(videoTime); // Keep the scrubber time in sync with the video time when settled.
   }, [videoTime]);
 
   // This handles the situation where the thumb is used to seek.
@@ -64,7 +67,7 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
       <div className="h-[221px]" style={{ width: `${pinkAreaWidth + 32}px` }}>
         <div className="relative h-[167px] w-full">
           <div className="absolute bottom-0 left-0 right-0 h-32 w-full pe-2 ps-2">
-            <div className="h-full w-full rounded-lg bg-zinc-900 p-2">
+            <div className="relative h-full w-full rounded-lg bg-zinc-900 p-2">
               {/**This pink area is the length of the video. Its width should directly match the calculated width.*/}
               <div
                 ref={pinkAreaRef}
@@ -177,7 +180,7 @@ function AdMarkerOverlay({
                 className={`absolute flex h-full w-[42px] flex-col items-center justify-between rounded-md border-2 border-zinc-900 pb-2 pt-2 ${marker.type === "Static" ? "bg-blue-300 stroke-blue-800 text-blue-800" : marker.type === "A/B" ? "bg-orange-300 stroke-orange-800 text-orange-800" : "bg-green-300 stroke-green-800 text-green-800"}`}
               >
                 <div
-                  className={`flex h-[14px] w-[14px] flex-row items-center justify-center rounded border text-center text-[10px] ${
+                  className={`flex max-h-[14px] flex-row items-center justify-center rounded border p-1 text-center text-[10px] ${
                     marker.type === "Static"
                       ? "border-blue-800"
                       : marker.type === "A/B"
@@ -189,7 +192,7 @@ function AdMarkerOverlay({
                     {marker.type === "Static"
                       ? "S"
                       : marker.type === "A/B"
-                        ? ""
+                        ? "A/B"
                         : "A"}
                   </span>
                 </div>

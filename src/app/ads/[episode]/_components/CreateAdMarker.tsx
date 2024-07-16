@@ -28,7 +28,7 @@ export default function CreateAdMarkerButtons({
     createMarker.mutate(
       {
         type: markerType,
-        value: Math.floor(videoContext.controls.videoTime * 1000), // Marker values are stored in millis
+        value: Math.floor(videoContext.scrubberTime * 1000), // Marker values are stored in millis
         episodeId: episodeId,
       },
       {
