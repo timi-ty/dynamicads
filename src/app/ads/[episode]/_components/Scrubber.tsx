@@ -94,6 +94,7 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
               />
             </div>
           </div>
+          {/**This is the scrubber thumb. It triggers isSeeking onMouseDown */}
           <div
             className="absolute bottom-0 left-0 top-0 h-full w-8 cursor-pointer"
             draggable={false}
