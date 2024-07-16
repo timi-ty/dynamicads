@@ -12,9 +12,7 @@ export default function Inspector({
 }: Readonly<{
   className?: string;
 }>) {
-  // This min is a magic value selected for a 17s video to just fit the scrubber within its container.
-  // Zoom levels below this will make the timestamp have too little space for text.
-  const minZoomIndex = -0.28;
+  const minZoomIndex = 0;
   const maxZoomIndex = 1;
   const [zoomIndex, setZoomIndex] = useState(0);
   const videoContext = useContext(EpisodeVideoContext);
@@ -47,7 +45,7 @@ function Controls({
   zoomOpts?: { minZoomIndex?: number; maxZoomIndex?: number };
 }>) {
   const videoContext = useContext(EpisodeVideoContext);
-  const videoTime = videoContext.controls.videoTime;
+  const scrubberTime = videoContext.scrubberTime;
   const { canUndo, canRedo, undoAction, redoAction } = useGlobalActionStack();
 
   return (
@@ -89,7 +87,7 @@ function Controls({
         </button>
       </div>
       <span className="rounded-md border p-3 pb-2 pt-2">
-        {millisecondsToHHMMSS(videoTime * 1000)}
+        {millisecondsToHHMMSS(scrubberTime * 1000)}
       </span>
       <ZoomSlider
         zoomIndex={zoomIndex}
@@ -123,6 +121,11 @@ function ZoomSlider({
           alt="zoom out"
           width={20}
           height={20}
+          onClick={() =>
+            setZoomIndex(
+              Math.max(zoomIndex - 0.2, zoomOpts?.minZoomIndex || -1),
+            )
+          }
         />
       </button>
       <input
@@ -139,6 +142,9 @@ function ZoomSlider({
           alt="zoom out"
           width={20}
           height={20}
+          onClick={() =>
+            setZoomIndex(Math.min(zoomIndex + 0.2, zoomOpts?.maxZoomIndex || 1))
+          }
         />
       </button>
     </div>
