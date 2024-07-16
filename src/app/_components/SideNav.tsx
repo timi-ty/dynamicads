@@ -5,15 +5,18 @@ import CreateEpisodeButton from "./CreateEpisode";
 import EpisodePicker from "./EpisodePicker";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Switch from "../_generic_components/Switch";
+import { useState } from "react";
 
 export default function SideNav({
   className,
 }: Readonly<{ className?: string }>) {
   const pathName = usePathname();
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   return (
     <nav className={className}>
-      <div className="w-80 p-8">
+      <div className="w-80 overflow-x-hidden p-8">
         <CreateEpisodeButton />
         <EpisodePicker className="mt-4" />
         <div className="mt-8 flex flex-col gap-8 pe-8 ps-8">
@@ -141,6 +144,91 @@ export default function SideNav({
             </svg>
             <span className="text-2xl">Settings</span>
           </Link>
+        </div>
+        <Image
+          src="/placeholder_widget.png"
+          alt="trends placeholder"
+          width={256}
+          height={226}
+          className="mt-[176px]"
+        />
+        <div className="mt-[176px] flex flex-col gap-8 pe-8 ps-8">
+          <div className="link flex cursor-pointer flex-row items-center gap-4">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10.0001 18.3334C14.6025 18.3334 18.3334 14.6024 18.3334 10C18.3334 5.39765 14.6025 1.66669 10.0001 1.66669C5.39771 1.66669 1.66675 5.39765 1.66675 10C1.66675 14.6024 5.39771 18.3334 10.0001 18.3334Z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M8.33341 6.66669L13.3334 10L8.33341 13.3334V6.66669Z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Demo mode</span>
+            <Switch
+              isOn={isDemoMode}
+              handleToggle={() => setIsDemoMode((d) => !d)}
+            />
+          </div>
+
+          <div className="link flex cursor-pointer flex-row items-center gap-4">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18.3334 10.8333V4.99998C18.3334 4.55795 18.1578 4.13403 17.8453 3.82147C17.5327 3.50891 17.1088 3.33331 16.6667 3.33331H3.33341C2.89139 3.33331 2.46746 3.50891 2.1549 3.82147C1.84234 4.13403 1.66675 4.55795 1.66675 4.99998V15C1.66675 15.9166 2.41675 16.6666 3.33341 16.6666H10.0001M18.3334 5.83331L10.8584 10.5833C10.6011 10.7445 10.3037 10.83 10.0001 10.83C9.69648 10.83 9.39902 10.7445 9.14175 10.5833L1.66675 5.83331M15.8334 13.3333V18.3333M13.3334 15.8333H18.3334"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Invite your team</span>
+          </div>
+
+          <div className="link flex cursor-pointer flex-row items-center gap-4">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12.5 11.6667C12.6667 10.8334 13.0833 10.25 13.75 9.58335C14.5833 8.83335 15 7.75002 15 6.66669C15 5.3406 14.4732 4.06883 13.5355 3.13115C12.5979 2.19347 11.3261 1.66669 10 1.66669C8.67392 1.66669 7.40215 2.19347 6.46447 3.13115C5.52678 4.06883 5 5.3406 5 6.66669C5 7.50002 5.16667 8.50002 6.25 9.58335C6.83333 10.1667 7.33333 10.8334 7.5 11.6667M7.5 15H12.5M8.33333 18.3334H11.6667"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Give feedback</span>
+          </div>
+
+          <div className="link flex cursor-pointer flex-row items-center gap-4">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M7.57508 7.50002C7.771 6.94308 8.15771 6.47344 8.66671 6.1743C9.17571 5.87515 9.77416 5.7658 10.3561 5.86561C10.938 5.96543 11.4658 6.26796 11.846 6.71963C12.2262 7.1713 12.4343 7.74296 12.4334 8.33335C12.4334 10 9.93341 10.8334 9.93341 10.8334M10.0001 14.1667H10.0084M18.3334 10C18.3334 14.6024 14.6025 18.3334 10.0001 18.3334C5.39771 18.3334 1.66675 14.6024 1.66675 10C1.66675 5.39765 5.39771 1.66669 10.0001 1.66669C14.6025 1.66669 18.3334 5.39765 18.3334 10Z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Help & support</span>
+          </div>
         </div>
       </div>
     </nav>

@@ -58,7 +58,9 @@ function EpisodeDropdownItem({
           height={32}
           className="flex-shrink-0"
         />
-        <span className="pe-8 ps-8 text-zinc-500">{data.name}</span>
+        <span className="line-clamp-2 pe-8 ps-8 text-zinc-500">
+          {data.name}
+        </span>
       </div>
 
       {isPicker && (

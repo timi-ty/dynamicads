@@ -7,7 +7,7 @@ export const episodeRouter = createTRPCRouter({
     .input(
       z.object({
         videoUrl: z.string().url(),
-        episodeName: z.string().min(4).max(30),
+        episodeName: z.string().min(4).max(120),
       }),
     )
     .mutation(async ({ ctx, input }) => {

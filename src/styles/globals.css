@@ -70,7 +70,7 @@
   }
 }
 
-/*We don't need a html scroll bar because the page only scrolls to reveal the footer, otherwise it is a full page app.*/
+/*No need for a html scroll bar because the page only scrolls to reveal the footer, otherwise it is a full page app.*/
 
 html::-webkit-scrollbar {
   display: none;
@@ -79,4 +79,35 @@ html::-webkit-scrollbar {
 html {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
+}
+
+/*Scrollbar styles by ChatGPT*/
+/* For Webkit browsers (Chrome, Safari, and newer versions of Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+  border-radius: 999px; /* Fully rounded corners */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e4e4e7;
+  border-radius: 999px; /* Fully rounded corners */
+}
+
+::-webkit-scrollbar-button {
+  display: none; /* Remove arrows */
+}
+
+*::-webkit-scrollbar-track {
+  background: #f4f4f5;
+  border-radius: 999px; /* Fully rounded corners */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #e4e4e7;
+  border-radius: 999px; /* Fully rounded corners */
 }

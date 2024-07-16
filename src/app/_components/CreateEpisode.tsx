@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { UploadButton } from "~/utils/uploadthing";
 import ModalOverlay from "../_generic_components/ModalOverlay";
 import Image from "next/image";
@@ -15,7 +15,7 @@ type CreateEpisodeStatus =
 
 export default function CreateEpisodeButton() {
   const [status, setStatus] = useState<CreateEpisodeStatus>("Done");
-  const [fileUrl, setFileUrl] = useState("");
+  const [fileDesc, setFileDesc] = useState({ name: "", url: "" });
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const queryApi = api.useUtils();
@@ -24,7 +24,7 @@ export default function CreateEpisodeButton() {
   function handleFinish(episodeName: string) {
     setStatus("Finishing");
     createEpisode.mutate(
-      { episodeName: episodeName, videoUrl: fileUrl },
+      { episodeName: episodeName, videoUrl: fileDesc.url },
       {
         onSuccess: () => {
           setStatus("Done");
@@ -56,7 +56,7 @@ export default function CreateEpisodeButton() {
           }}
           onClientUploadComplete={(res) => {
             if (res && res.length > 0 && res[0]) {
-              setFileUrl(res[0].url);
+              setFileDesc({ name: res[0].name, url: res[0].url });
               setStatus("Naming");
             } else {
               setStatus("Error");
@@ -73,6 +73,7 @@ export default function CreateEpisodeButton() {
         uploadProgress={uploadProgress}
         handleFinish={handleFinish}
         handleDismiss={handleDismiss}
+        defaultName={fileDesc.name}
       />
     </>
   );
@@ -83,13 +84,17 @@ function CreateEpisodeModalGroup({
   uploadProgress,
   handleFinish,
   handleDismiss,
+  defaultName,
 }: Readonly<{
   status: CreateEpisodeStatus;
   uploadProgress: number;
   handleFinish: (episodeName: string) => void;
   handleDismiss: () => void;
+  defaultName: string;
 }>) {
-  const [episodeName, setEpisodeName] = useState("");
+  const [episodeName, setEpisodeName] = useState(defaultName);
+
+  useEffect(() => setEpisodeName(defaultName), [defaultName]);
 
   function handleSubmit(ev: FormEvent) {
     ev.preventDefault();
@@ -119,8 +124,8 @@ function CreateEpisodeModalGroup({
             className="h-10 w-64 rounded border p-2"
             id="input_name_episode"
             type="text"
-            maxLength={30}
-            minLength={4}
+            maxLength={120}
+            minLength={1}
             required
             value={episodeName}
             onChange={(ev) => setEpisodeName(ev.target.value)}

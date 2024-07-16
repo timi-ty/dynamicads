@@ -136,6 +136,7 @@ function TimeStampSequence({
     <div className="flex w-full flex-row overflow-x-hidden pe-2 ps-2">
       {timeStamps.map((i) => (
         <TimeStamp
+          key={i}
           width={pinkAreaWidth / timeStamps.length}
           seconds={(i * videoLength) / timeStamps.length}
         />
