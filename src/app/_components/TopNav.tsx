@@ -11,10 +11,10 @@ export default function TopNav({
   return (
     <nav className={className}>
       <div className="flex flex-row items-center justify-between p-16 pb-6 pt-6">
-        <div className="flex flex-row items-center gap-4">
+        <Link href={"/"} className="flex flex-row items-center gap-4">
           <Image src={"/ic_brandmark.svg"} alt="logo" width={24} height={24} />
           <div className="text-2xl">Vidpod</div>
-        </div>
+        </Link>
         <div className="flex flex-row items-center gap-6">
           <button className="rounded-full hover:bg-zinc-100">
             <Image

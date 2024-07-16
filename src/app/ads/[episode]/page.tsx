@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Inspector from "./_components/Inspector";
 import { VideoContextProvider } from "./_context/VideoContext";
+import Link from "next/link";
 
 export default function EpisodePage({
   params,
@@ -29,7 +30,9 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
   if (data && data.episode)
     return (
       <div className="min-w-[1232px]">
-        <span className="text-sm text-zinc-500">{"<-"} Ads</span>
+        <Link href={"/"} className="link text-sm text-zinc-500">
+          {"<-"} Ads
+        </Link>
         <div className="mt-4 max-w-[616px] text-3xl">{data.episode.name}</div>
         <div className="mt-4 text-zinc-500">
           <span>
