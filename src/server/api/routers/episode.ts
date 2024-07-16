@@ -6,7 +6,7 @@ export const episodeRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        episodeUrl: z.string().url(),
+        videoUrl: z.string().url(),
         episodeName: z.string().min(4).max(30),
       }),
     )
@@ -15,7 +15,7 @@ export const episodeRouter = createTRPCRouter({
         await ctx.db.episode.create({
           data: {
             name: input.episodeName,
-            fileUrl: input.episodeUrl,
+            videoUrl: input.videoUrl,
             createdBy: { connect: { id: ctx.session.user.id } },
           },
         });

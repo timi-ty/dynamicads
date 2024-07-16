@@ -7,7 +7,7 @@ import { AdMarkerType } from "~/utils/types";
 import ConfigureAdMarkerModalGroup, {
   ConfigureAdMarkerStatus,
 } from "./ConfigureAdMarker";
-import VideoContext from "../_context/VideoContext";
+import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 
 export default function CreateAdMarkerButtons({
   episodeId,
@@ -21,7 +21,7 @@ export default function CreateAdMarkerButtons({
   const [status, setStatus] = useState<ConfigureAdMarkerStatus>("Done");
   const queryUtils = api.useUtils();
   const createMarker = api.marker.create.useMutation();
-  const videoContext = useContext(VideoContext);
+  const videoContext = useContext(EpisodeVideoContext);
 
   function handleFinish(markerType: AdMarkerType) {
     setStatus("Finishing");

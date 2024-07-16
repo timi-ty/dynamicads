@@ -2,20 +2,19 @@
 
 import Image from "next/image";
 import { useContext, useEffect, useRef } from "react";
-import VideoContext from "../_context/VideoContext";
+import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import { VideoControls } from "../_hooks/useVideoControls";
 
 export default function VideoPlayer({
   className,
-  videoUrl,
-}: Readonly<{ className?: string; videoUrl: string }>) {
-  const videoContext = useContext(VideoContext);
+}: Readonly<{ className?: string }>) {
+  const { setVideo, controls, episode } = useContext(EpisodeVideoContext);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // This effect sets the video for the current context tree.
+  // This effect sets the video element for the current context tree.
   useEffect(() => {
     if (videoRef.current) {
-      videoContext.setVideo(videoRef.current);
+      setVideo(videoRef.current);
     }
   }, [videoRef.current]);
 
@@ -25,15 +24,12 @@ export default function VideoPlayer({
         <div className="relative w-full">
           <video
             ref={videoRef}
-            src={videoUrl}
+            src={episode.videoUrl}
             className="h-[408px] w-full rounded-lg bg-zinc-900"
           />
-          {videoContext.controls.isBuffering && <VideoBuffererView />}
+          {controls.isBuffering && <VideoBuffererView />}
         </div>
-        <VideoControlsView
-          controls={videoContext.controls}
-          disabled={!videoContext.controls.isReady}
-        />
+        <VideoControlsView controls={controls} disabled={!controls.isReady} />
       </div>
     </div>
   );

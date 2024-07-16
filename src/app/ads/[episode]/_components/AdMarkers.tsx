@@ -6,18 +6,18 @@ import { AdMarkerType } from "~/utils/types";
 import AdMarkerItem from "./AdMarkerItem";
 import { api } from "~/trpc/react";
 import { useContext } from "react";
-import VideoContext from "../_context/VideoContext";
+import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 
 export default function AdMarkers({
   className,
-  episodeId,
 }: Readonly<{
   className?: string;
-  episodeId: number;
 }>) {
+  const { episode } = useContext(EpisodeVideoContext);
+
   return (
     <div className={className}>
-      <AdMarkersCard episodeId={episodeId} />
+      <AdMarkersCard episodeId={episode.id} />
     </div>
   );
 }
@@ -28,7 +28,7 @@ function AdMarkersCard({
   episodeId: number;
 }>) {
   const { data, error } = api.marker.getAll.useQuery({ episodeId: episodeId });
-  const videoContext = useContext(VideoContext);
+  const videoContext = useContext(EpisodeVideoContext);
 
   if (error || (data && data.error))
     return (

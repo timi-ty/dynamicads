@@ -24,7 +24,7 @@ export default function CreateEpisodeButton() {
   function handleFinish(episodeName: string) {
     setStatus("Finishing");
     createEpisode.mutate(
-      { episodeName: episodeName, episodeUrl: fileUrl },
+      { episodeName: episodeName, videoUrl: fileUrl },
       {
         onSuccess: () => {
           setStatus("Done");

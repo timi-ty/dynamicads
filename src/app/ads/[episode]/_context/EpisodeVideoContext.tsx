@@ -3,26 +3,37 @@
 import { createContext, ReactNode, useState } from "react";
 import { useVideoControls, VideoControls } from "../_hooks/useVideoControls";
 
-interface VideoConsumer {
-  setVideo: (video: HTMLVideoElement | null) => void;
-  controls: VideoControls;
+export interface Episode {
+  id: number;
+  createdAt: Date;
+  updatedAt: Date;
+  createdById: string;
+  name: string;
+  videoUrl: string;
 }
 
-export function VideoContextProvider({
+export interface EpisodeVideoConsumer {
+  setVideo: (video: HTMLVideoElement | null) => void;
+  controls: VideoControls;
+  episode: Episode;
+}
+
+export function EpisodeVideoContextProvider({
+  episode,
   children,
-}: Readonly<{ children: ReactNode }>) {
+}: Readonly<{ episode: Episode; children: ReactNode }>) {
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
   const videoControls = useVideoControls(video);
   return (
-    <VideoContext.Provider
-      value={{ setVideo: setVideo, controls: videoControls }}
+    <EpisodeVideoContext.Provider
+      value={{ setVideo: setVideo, controls: videoControls, episode: episode }}
     >
       {children}
-    </VideoContext.Provider>
+    </EpisodeVideoContext.Provider>
   );
 }
 
-const defaultConsumer: VideoConsumer = {
+const defaultConsumer: EpisodeVideoConsumer = {
   setVideo: function (video: HTMLVideoElement | null): void {
     throw new Error("Function not implemented.");
   },
@@ -59,7 +70,16 @@ const defaultConsumer: VideoConsumer = {
     isBuffering: false,
     isReady: false,
   },
+  episode: {
+    id: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdById: "",
+    name: "",
+    videoUrl: "",
+  },
 };
-const VideoContext = createContext(defaultConsumer);
 
-export default VideoContext;
+const EpisodeVideoContext = createContext(defaultConsumer);
+
+export default EpisodeVideoContext;
