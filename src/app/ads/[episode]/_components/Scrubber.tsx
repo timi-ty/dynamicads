@@ -29,7 +29,7 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   const [isSeekSettled, setIsSeekSettled] = useState(true); // We initially are not seeking and so seek starts as settled.
   function handleSeek() {
     setIsSeekSettled(false);
-    setLastSeekPosition(relativeMousePos.x); // We cache this to prevent the thumb from jumping to an old position while the seek is processing.
+    setLastSeekPosition(clamp(relativeMousePos.x, 0, pinkAreaWidth)); // We cache this to prevent the thumb from jumping to an old position while the seek is processing.
     let seekPoint = (relativeMousePos.x / pinkAreaWidth) * videoLength;
     seekPoint = clamp(seekPoint, 0, videoLength);
     publishScrubberTime(seekPoint); // Make the scrubber time available even before seek settles.
@@ -52,14 +52,28 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
     handleSeek(); // If we stopped seeking then we just finished a seek and we handle it.
   }, [isSeeking]);
 
-  // This effect ensures that if mouse down was triggered by this scrubber, any mouse up anywhere finishes the seek.
+  // This effect ensures that if mouse down was triggered by this scrubber, any mouse events anywhere are handled by the scrubber.
+  const handleSeekRef = useRef(handleSeek); // Create a reference to handleSeek to escape the closure.
+  const isSeekingRef = useRef(isSeeking); // Create a reference to isSeeking to escape the closure.
+  // Escape the closures to avoid having to rerun this effect on every frame becuase handleSeek is redeclared every frame.
+  // Attempting to useMemo or useCallback simply complicates the issue.
+  // This approach permits attaching the window level callbacks only once.
+  handleSeekRef.current = handleSeek; // Update this reference with the newest decalration of handleSeek.
+  isSeekingRef.current = isSeeking; // Update this reference with the current isSeeking state.
   useEffect(() => {
     function handleGlobalMouseUp() {
       setIsSeeking(false);
     }
+    function handleGlobalMouseMove(ev: MouseEvent) {
+      if (isSeekingRef.current) handleSeekRef.current();
+    }
     window.addEventListener("mouseup", handleGlobalMouseUp);
-    return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
-  }, [isSeeking]);
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
+      window.removeEventListener("mousemove", handleGlobalMouseMove);
+    };
+  }, []);
 
   return (
     <div className="w-full overflow-x-scroll pb-8 pt-4">
@@ -87,10 +101,6 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
               translate: `${isSeeking ? clamp(relativeMousePos.x, 0, pinkAreaWidth) : isSeekSettled ? thumbProgress : lastSeekPosition}px 0px`,
             }}
             onMouseDown={() => setIsSeeking(true)}
-            onMouseUp={() => setIsSeeking(false)}
-            onMouseMove={() => {
-              if (isSeeking) handleSeek(); // We process seeks gradually while moving.
-            }}
           >
             <Image
               src="/scrubber-thumb.svg"
