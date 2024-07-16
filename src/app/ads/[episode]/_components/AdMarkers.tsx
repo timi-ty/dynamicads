@@ -13,22 +13,17 @@ export default function AdMarkers({
 }: Readonly<{
   className?: string;
 }>) {
-  const { episode } = useContext(EpisodeVideoContext);
-
+  // We wrap the AdMarkersCard because it returns different layouts based on loading conditions but they all need to have a consistent parent.
   return (
     <div className={className}>
-      <AdMarkersCard episodeId={episode.id} />
+      <AdMarkersCard />
     </div>
   );
 }
 
-function AdMarkersCard({
-  episodeId,
-}: Readonly<{
-  episodeId: number;
-}>) {
-  const { data, error } = api.marker.getAll.useQuery({ episodeId: episodeId });
-  const videoContext = useContext(EpisodeVideoContext);
+function AdMarkersCard() {
+  const { controls, episode } = useContext(EpisodeVideoContext);
+  const { data, error } = api.marker.getAll.useQuery({ episodeId: episode.id });
 
   if (error || (data && data.error))
     return (
@@ -64,8 +59,8 @@ function AdMarkersCard({
         )}
         <CreateAdMarkerButtons
           className="pe-8 ps-8"
-          episodeId={episodeId}
-          disabled={!videoContext.controls.isReady}
+          episodeId={episode.id}
+          disabled={!controls.isReady}
         />
       </div>
     );
