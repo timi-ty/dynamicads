@@ -12,14 +12,14 @@ export const episodeRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.db.episode.create({
+        const episode = await ctx.db.episode.create({
           data: {
             name: input.episodeName,
             videoUrl: input.videoUrl,
             createdBy: { connect: { id: ctx.session.user.id } },
           },
         });
-        return;
+        return { episode: episode };
       } catch (e) {
         return { error: "internal server error" };
       }

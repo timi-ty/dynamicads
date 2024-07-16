@@ -46,13 +46,13 @@ export const markerRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.db.marker.update({
+        const updatedMarker = await ctx.db.marker.update({
           where: { id: input.markerId, createdById: ctx.session.user.id },
           data: {
             type: input.type,
           },
         });
-        return;
+        return { updatedMarker: updatedMarker };
       } catch (e) {
         return { error: "internal server error" };
       }
@@ -83,10 +83,10 @@ export const markerRouter = createTRPCRouter({
     .input(z.object({ markerId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.db.marker.delete({
+        const deletedMarker = await ctx.db.marker.delete({
           where: { id: input.markerId, createdById: ctx.session.user.id },
         });
-        return;
+        return { deletedMarker: deletedMarker };
       } catch (e: any) {
         return { error: "internal server error" };
       }

@@ -36,20 +36,19 @@ export default function CreateAdMarkerButtons({
       });
       if (marker.error || !marker.marker) {
         setStatus("Error");
-        // Failed to create marker, this situation is not reversible.
-        return null;
-      } else {
-        setStatus("Done");
-        queryUtils.marker.getAll.invalidate();
+        return null; // Failed to create marker, this situation is not reversible.
       }
+      setStatus("Done");
+      queryUtils.marker.getAll.invalidate();
 
       return { markerId: marker.marker.id };
     }
-    function revert(params?: { markerId: number }) {
+    async function revert(params?: { markerId: number }) {
       if (!params) return; // Did not get the needed parameters, can't revert.
 
-      console.log("reverting create:", params.markerId);
-      deleteMarker.mutate(
+      /* This is better implemented as a soft delete. Deleting as a reversal of a creation means the data cannot be truly recovered.
+      Due to this, the redo stack must be invalidated*/
+      await deleteMarker.mutateAsync(
         { markerId: params.markerId },
         {
           onSettled: () => {
@@ -57,6 +56,7 @@ export default function CreateAdMarkerButtons({
           },
         },
       );
+      return null; // Invalidate the redo stack. Cannot redo the create.
     }
     doAction(primary, revert);
   }
