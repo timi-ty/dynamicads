@@ -1,5 +1,3 @@
-import { AdMarkerType } from "./types";
-
 export function millisecondsToHHMMSS(milliseconds: number): string {
   // Calculate total seconds
   const totalSeconds = Math.floor(milliseconds / 1000);

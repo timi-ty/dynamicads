@@ -3,9 +3,9 @@
 import Image from "next/image";
 import { useContext, useState } from "react";
 import { api } from "~/trpc/react";
-import { AdMarkerType } from "~/utils/types";
+import { type AdMarkerType } from "~/utils/types";
 import ConfigureAdMarkerModalGroup, {
-  ConfigureAdMarkerStatus,
+  type ConfigureAdMarkerStatus,
 } from "./ConfigureAdMarker";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
@@ -29,19 +29,20 @@ export default function CreateAdMarkerButtons({
   function handleFinish(markerType: AdMarkerType) {
     async function primary() {
       setStatus("Finishing");
-      const marker = await createMarker.mutateAsync({
+      const { marker, error } = await createMarker.mutateAsync({
+        // No need to wrap in try block for actions.
         type: markerType,
         value: Math.floor(videoContext.scrubberTime * 1000), // Marker values are stored in millis
         episodeId: episodeId,
       });
-      if (marker.error || !marker.marker) {
+      if (error ?? !marker) {
         setStatus("Error");
         return null; // Failed to create marker, this situation is not reversible.
       }
       setStatus("Done");
-      queryUtils.marker.getAll.invalidate();
+      void queryUtils.marker.getAll.invalidate();
 
-      return { markerId: marker.marker.id };
+      return { markerId: marker.id };
     }
     async function revert(params?: { markerId: number }) {
       if (!params) return; // Did not get the needed parameters, can't revert.
@@ -52,13 +53,13 @@ export default function CreateAdMarkerButtons({
         { markerId: params.markerId },
         {
           onSettled: () => {
-            queryUtils.marker.getAll.invalidate();
+            void queryUtils.marker.getAll.invalidate();
           },
         },
       );
-      return null; // Invalidate the redo stack. Cannot redo the create.
+      return null; // Deleting this maker is non-reversible as it would take on a new id if it gets recreated.
     }
-    doAction(primary, revert);
+    void doAction(primary, revert);
   }
 
   function handleDismiss() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import useNoDocumentScroll from "../_hooks/useNoDocumentScroll";
 
 export default function ModalOverlay({

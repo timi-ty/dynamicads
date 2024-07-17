@@ -2,16 +2,21 @@ import { useEffect, useState } from "react";
 
 /* Gets the mouse position relative to the client window. 
  Not supplying an updateWhen condition makes this hook trigger a re-render for every mouse move event.*/
-export default function useMouseClientPos(updateWhen: boolean = true) {
+export default function useMouseClientPos(updateWhen = true) {
   const [mouseClientPos, setMouseClientPos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     function handleMouseMove(ev: MouseEvent) {
       if (updateWhen) setMouseClientPos({ x: ev.clientX, y: ev.clientY });
     }
+    function handleMouseDown(ev: MouseEvent) {
+      setMouseClientPos({ x: ev.clientX, y: ev.clientY });
+    }
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousedown", handleMouseDown);
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
     };
   }, [updateWhen]);
 
@@ -22,7 +27,7 @@ export default function useMouseClientPos(updateWhen: boolean = true) {
 // Will return 0, 0 if the mouse is positioned exactly at the top left of this element.
 export function useRelativeMousePos(
   container: HTMLElement | null,
-  updateWhen: boolean = true,
+  updateWhen = true,
 ) {
   const { mouseClientPos } = useMouseClientPos(updateWhen);
   const relativeMousePos = container

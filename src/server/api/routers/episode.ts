@@ -20,7 +20,7 @@ export const episodeRouter = createTRPCRouter({
           },
         });
         return { episode: episode };
-      } catch (e) {
+      } catch {
         return { error: "internal server error" };
       }
     }),
@@ -31,7 +31,7 @@ export const episodeRouter = createTRPCRouter({
         where: { createdById: ctx.session.user.id },
       });
       return { episodes: episodes };
-    } catch (e) {
+    } catch {
       return { error: "internal server error" };
     }
   }),
@@ -44,7 +44,7 @@ export const episodeRouter = createTRPCRouter({
           where: { id: input.id, createdById: ctx.session.user.id },
         });
         return { episode: episode };
-      } catch (e: any) {
+      } catch {
         return { error: "internal server error" };
       }
     }),

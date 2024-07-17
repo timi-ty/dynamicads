@@ -16,9 +16,9 @@ export default function AdsPage() {
     // If the ads page is showing, navigate to the picked episode.
     // If there is no valid episode, but there is data, pick the first episode on the list.
 
-    if (error || (data && data.error)) return;
+    if (error ?? data?.error) return;
 
-    if (data && data.episodes && data.episodes.length > 0 && data.episodes[0]) {
+    if (data?.episodes && data.episodes.length > 0 && data.episodes[0]) {
       const pickedEpisode = data.episodes.find(
         (episode) => episode.id === pickedEpisodeId,
       );
@@ -31,9 +31,9 @@ export default function AdsPage() {
         setPickedEpisodeId(data.episodes[0].id);
       }
     }
-  }, [pickedEpisodeId, data, error]);
+  }, [pickedEpisodeId, data, error, setPickedEpisodeId, router]);
 
-  if (error || (data && data.error)) return <Error />;
+  if (error ?? data?.error) return <Error />;
 
   if (isLoading) return <Loader />;
 

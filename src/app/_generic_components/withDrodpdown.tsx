@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { type Key, type ReactNode, useEffect, useState } from "react";
 
 type IdType<K> = {
   id: K;
@@ -16,7 +16,7 @@ export type DropdownItemPropsType<T, K> = {
 export default function withDropdown<T extends { id: K }, K>(
   BaseComponent: (props: DropdownItemPropsType<T, K>) => ReactNode,
 ) {
-  return ({
+  function Dropdown({
     items,
     pickedItemId,
     onSelectItem,
@@ -26,7 +26,7 @@ export default function withDropdown<T extends { id: K }, K>(
     pickedItemId?: K;
     onSelectItem?: (selected: T) => void;
     className?: string;
-  }>) => {
+  }>) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [selectedItem, setSelectedItem] = useState(items[0]);
 
@@ -35,7 +35,7 @@ export default function withDropdown<T extends { id: K }, K>(
       // pickedItem can be undefined in which case it does nothing
       if (!pickedItem) return;
       setSelectedItem(pickedItem);
-    }, [pickedItemId]);
+    }, [pickedItemId, items, setSelectedItem]);
 
     return (
       <div className={className} onClick={() => setIsExpanded((x) => !x)}>
@@ -48,10 +48,9 @@ export default function withDropdown<T extends { id: K }, K>(
             })}
           <div className="absolute">
             {isExpanded &&
-              items &&
-              items.map((item) => (
+              items?.map((item) => (
                 <div
-                  key={item.id as any}
+                  key={item.id as Key}
                   onClick={() => {
                     setSelectedItem(item);
                     if (onSelectItem) onSelectItem(item);
@@ -68,5 +67,7 @@ export default function withDropdown<T extends { id: K }, K>(
         </div>
       </div>
     );
-  };
+  }
+
+  return Dropdown;
 }

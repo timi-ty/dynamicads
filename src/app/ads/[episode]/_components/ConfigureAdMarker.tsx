@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import ModalOverlay from "~/app/_generic_components/ModalOverlay";
-import { AdMarkerType } from "~/utils/types";
+import { type AdMarkerType } from "~/utils/types";
 
 export type ConfigureAdMarkerStatus =
   | "Done"

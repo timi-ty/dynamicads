@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { UploadButton } from "~/utils/uploadthing";
 import ModalOverlay from "../_generic_components/ModalOverlay";
 import Image from "next/image";
@@ -28,7 +28,7 @@ export default function CreateEpisodeButton() {
       {
         onSuccess: () => {
           setStatus("Done");
-          queryApi.episode.invalidate();
+          void queryApi.episode.invalidate();
         },
         onError: () => {
           setStatus("Error");

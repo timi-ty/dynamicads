@@ -32,7 +32,7 @@ export const authOptions: NextAuthOptions = {
       return {
         ...params.session,
         user: {
-          id: params.token.sub || "",
+          id: params.token.sub ?? "",
           name: params.session.user.name,
         },
       };

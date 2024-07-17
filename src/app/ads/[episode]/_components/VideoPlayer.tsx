@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useContext, useEffect, useRef } from "react";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
-import { VideoControls } from "../_hooks/useVideoControls";
+import { type VideoControls } from "../_hooks/useVideoControls";
 
 export default function VideoPlayer({
   className,
@@ -16,7 +16,7 @@ export default function VideoPlayer({
     if (videoRef.current) {
       setVideo(videoRef.current);
     }
-  }, [videoRef.current]);
+  }, [setVideo]);
 
   return (
     <div className={className}>

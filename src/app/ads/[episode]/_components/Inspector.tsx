@@ -2,7 +2,7 @@
 
 import { millisecondsToHHMMSS } from "~/utils/format";
 import Image from "next/image";
-import { ChangeEvent, useContext, useState } from "react";
+import { type ChangeEvent, useContext, useState } from "react";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import Scrubber, { ScrubberLoader } from "./Scrubber";
 import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
@@ -123,15 +123,15 @@ function ZoomSlider({
           height={20}
           onClick={() =>
             setZoomIndex(
-              Math.max(zoomIndex - 0.2, zoomOpts?.minZoomIndex || -1),
+              Math.max(zoomIndex - 0.2, zoomOpts?.minZoomIndex ?? -1),
             )
           }
         />
       </button>
       <input
         type="range"
-        min={(zoomOpts?.minZoomIndex || 0) * 100}
-        max={(zoomOpts?.maxZoomIndex || 1) * 100}
+        min={(zoomOpts?.minZoomIndex ?? 0) * 100}
+        max={(zoomOpts?.maxZoomIndex ?? 1) * 100}
         value={zoomIndex * 100}
         className="slider"
         onChange={handleSliderChange}
@@ -143,7 +143,7 @@ function ZoomSlider({
           width={20}
           height={20}
           onClick={() =>
-            setZoomIndex(Math.min(zoomIndex + 0.2, zoomOpts?.maxZoomIndex || 1))
+            setZoomIndex(Math.min(zoomIndex + 0.2, zoomOpts?.maxZoomIndex ?? 1))
           }
         />
       </button>

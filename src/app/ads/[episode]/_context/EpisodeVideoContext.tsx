@@ -1,7 +1,10 @@
 "use client";
 
-import { createContext, ReactNode, useState } from "react";
-import { useVideoControls, VideoControls } from "../_hooks/useVideoControls";
+import { createContext, type ReactNode, useState } from "react";
+import {
+  useVideoControls,
+  type VideoControls,
+} from "../_hooks/useVideoControls";
 
 export interface Episode {
   id: number;
@@ -44,7 +47,7 @@ export function EpisodeVideoContextProvider({
 }
 
 const defaultConsumer: EpisodeVideoConsumer = {
-  setVideo: function (video: HTMLVideoElement | null): void {
+  setVideo: function (_: HTMLVideoElement | null): void {
     throw new Error("Function not implemented.");
   },
   controls: {
@@ -54,10 +57,10 @@ const defaultConsumer: EpisodeVideoConsumer = {
     togglePlay: function (): void {
       throw new Error("Function not implemented.");
     },
-    plusSeconds: function (seconds: number): void {
+    plusSeconds: function (_: number): void {
       throw new Error("Function not implemented.");
     },
-    minusSeconds: function (seconds: number): void {
+    minusSeconds: function (_: number): void {
       throw new Error("Function not implemented.");
     },
     isRewinding: false,
@@ -74,7 +77,7 @@ const defaultConsumer: EpisodeVideoConsumer = {
     jumpToEnd: function (): void {
       throw new Error("Function not implemented.");
     },
-    seek: function (seconds: number): void {
+    seek: function (_: number): void {
       throw new Error("Function not implemented.");
     },
     isBuffering: false,
@@ -89,7 +92,7 @@ const defaultConsumer: EpisodeVideoConsumer = {
     videoUrl: "",
   },
   scrubberTime: 0,
-  publishScrubberTime: function (time: number): void {
+  publishScrubberTime: function (_: number): void {
     throw new Error("Function not implemented.");
   },
 };

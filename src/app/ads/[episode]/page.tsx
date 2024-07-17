@@ -20,14 +20,14 @@ export default function EpisodePage({
 async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
   const data = await api.episode.get({ id: episodeId });
 
-  if (!data || (data && data.error))
+  if (data ? data.error : false)
     return (
       <div className="flex h-full flex-row items-center justify-center text-zinc-500">
         <span>An error occured.</span>
       </div>
     );
 
-  if (data && data.episode)
+  if (data?.episode)
     return (
       <div className="min-w-[1232px]">
         <Link href={"/"} className="link text-sm text-zinc-500">

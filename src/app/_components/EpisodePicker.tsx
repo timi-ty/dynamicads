@@ -12,10 +12,10 @@ export default function EpisodePicker({
   const { data, error } = api.episode.getAll.useQuery();
   const [pickedEpisodeId, setPickedEpisodeId] = usePickedEpisodeId();
 
-  if (error || (data && data.error))
+  if (error ?? data?.error)
     return <EpisodeItemEmpty className={className} hasError={true} />;
 
-  if (data && data.episodes && data.episodes.length > 0)
+  if (data?.episodes && data.episodes.length > 0)
     return (
       <EpisodeDropdown
         className={className}

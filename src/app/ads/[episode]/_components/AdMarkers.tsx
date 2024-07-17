@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import CreateAdMarkerButtons from "./CreateAdMarker";
-import { AdMarkerType } from "~/utils/types";
+import { type AdMarkerType } from "~/utils/types";
 import AdMarkerItem from "./AdMarkerItem";
 import { api } from "~/trpc/react";
 import { useContext } from "react";
@@ -25,14 +25,14 @@ function AdMarkersCard() {
   const { controls, episode } = useContext(EpisodeVideoContext);
   const { data, error } = api.marker.getAll.useQuery({ episodeId: episode.id });
 
-  if (error || (data && data.error))
+  if (error ?? data?.error)
     return (
       <div className="flex h-[552px] w-[412px] flex-col items-center justify-center rounded-2xl border bg-white p-8 text-zinc-500 shadow">
         <span>An error occured.</span>
       </div>
     );
 
-  if (data && data.markers)
+  if (data?.markers)
     return (
       <div className="flex h-[552px] w-[412px] flex-col justify-between rounded-2xl border bg-white pb-8 pt-8 shadow">
         <div>

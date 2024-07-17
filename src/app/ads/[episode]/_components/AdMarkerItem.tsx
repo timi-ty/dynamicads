@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 import { millisecondsToHHMMSS } from "~/utils/format";
-import { AdMarkerType } from "~/utils/types";
+import { type AdMarkerType } from "~/utils/types";
 import ConfigureAdMarkerModalGroup, {
-  ConfigureAdMarkerStatus,
+  type ConfigureAdMarkerStatus,
 } from "./ConfigureAdMarker";
 import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
 
@@ -29,15 +29,16 @@ export default function AdMarkerItem({
     async function primary() {
       setStatus("Finishing");
       const { updatedMarker } = await editMarker.mutateAsync({
+        // No need to wrap in try block for actions.
         type: markerType,
         markerId: id,
       });
-      if (editMarker.error || !updatedMarker) {
+      if (editMarker.error ?? !updatedMarker) {
         setStatus("Error");
         return null; // Nothing to revert.
       }
       setStatus("Done");
-      queryUtils.marker.getAll.invalidate();
+      void queryUtils.marker.getAll.invalidate();
 
       return { oldType: type, markerId: id };
     }
@@ -52,12 +53,12 @@ export default function AdMarkerItem({
         {
           onSuccess: () => {
             setStatus("Done");
-            queryUtils.marker.getAll.invalidate();
+            void queryUtils.marker.getAll.invalidate();
           },
         },
       );
     }
-    doAction(primary, revert);
+    void doAction(primary, revert);
   }
 
   function handleDismiss() {
@@ -69,8 +70,8 @@ export default function AdMarkerItem({
       const { deletedMarker } = await deleteMarker.mutateAsync({
         markerId: id,
       });
-      if (deleteMarker.error || !deletedMarker) return null; // Nothing to revert.
-      queryUtils.marker.getAll.invalidate();
+      if (deleteMarker.error ?? !deletedMarker) return null; // Nothing to revert.
+      void queryUtils.marker.getAll.invalidate();
 
       return {
         deletedMarkerType: deletedMarker.type as AdMarkerType,
@@ -79,6 +80,7 @@ export default function AdMarkerItem({
       };
     }
     async function revert(params?: {
+      // A delete is not really reversible but we allow it to be reversed once at the cost of losing the the undo history.
       deletedMarkerType: AdMarkerType;
       deletedMarkerEpisodeId: number;
       deletedMarkerValue: number;
@@ -92,11 +94,11 @@ export default function AdMarkerItem({
         value: params.deletedMarkerValue,
         episodeId: params.deletedMarkerEpisodeId,
       });
-      if (createMarker.error || !marker) return null;
-      queryUtils.marker.getAll.invalidate();
-      return null; // Returning null here invalidates the redo stack. Cannot redo the delete.
+      if (createMarker.error ?? !marker) return null;
+      void queryUtils.marker.getAll.invalidate();
+      return null; // Creating a new marker with a new unique id means this revert operation is non reversible. Return null. Undo history will be lost.
     }
-    doAction(primary, revert);
+    void doAction(primary, revert);
   }
 
   return (
@@ -119,8 +121,9 @@ export default function AdMarkerItem({
             Edit
           </button>
           <button
-            onClick={!deleteMarker.isPending ? handleDelete : () => {}}
+            onClick={handleDelete}
             className={`${deleteMarker.isPending ? "opacity-20" : ""}`}
+            disabled={deleteMarker.isPending}
           >
             <Image
               src="/ic_trash.svg"

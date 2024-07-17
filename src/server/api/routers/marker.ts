@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { validMarkerTypes } from "~/utils/data";
-import { AdMarkerType } from "~/utils/types";
+import { type AdMarkerType } from "~/utils/types";
 
 export const markerRouter = createTRPCRouter({
   create: protectedProcedure
@@ -28,7 +28,7 @@ export const markerRouter = createTRPCRouter({
           },
         });
         return { marker: marker };
-      } catch (e) {
+      } catch {
         return { error: "internal server error" };
       }
     }),
@@ -53,7 +53,7 @@ export const markerRouter = createTRPCRouter({
           },
         });
         return { updatedMarker: updatedMarker };
-      } catch (e) {
+      } catch {
         return { error: "internal server error" };
       }
     }),
@@ -74,7 +74,7 @@ export const markerRouter = createTRPCRouter({
           },
         });
         return { markers: markers };
-      } catch (e) {
+      } catch {
         return { error: "internal server error" };
       }
     }),
@@ -87,7 +87,7 @@ export const markerRouter = createTRPCRouter({
           where: { id: input.markerId, createdById: ctx.session.user.id },
         });
         return { deletedMarker: deletedMarker };
-      } catch (e: any) {
+      } catch {
         return { error: "internal server error" };
       }
     }),

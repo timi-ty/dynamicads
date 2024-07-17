@@ -10,7 +10,7 @@ export default function HomePage() {
   useEffect(() => {
     // Navigate to the '/ads' page on render.
     router.push("/ads");
-  }, []);
+  }, [router]);
 
   return <Loader />;
 }

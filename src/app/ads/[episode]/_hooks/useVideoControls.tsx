@@ -41,7 +41,7 @@ export function useVideoControls(
       setIsBuffering(false);
     }
     function handleWaiting() {
-      currentVideo.play(); // Only a currently playing video is considered as buffering.
+      void currentVideo.play(); // Only a currently playing video is considered as buffering.
       setIsBuffering(true);
     }
     // Immediately call these two in case they are set before the effect runs.
@@ -116,7 +116,7 @@ export function useVideoControls(
     if (video.paused || video.ended) {
       setIsRewinding(false); // Every time video plays or pauses, cancel seeking.
       setIsFastforwarding(false);
-      video.play();
+      void video.play();
     } else {
       setIsFastforwarding(false); // Every time video plays or pauses, cancel seeking.
       setIsFastforwarding(false);

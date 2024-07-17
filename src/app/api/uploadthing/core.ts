@@ -5,17 +5,16 @@ import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
-// Fake auth function, we simply disable the upload button from server side if the session is not valid
-const auth = (req: Request) => ({ id: "fakeId" });
+// Fake auth function, we simply disable the upload button from server side if the session is not valid. This should instead integrate with nect-auth.
+const auth = (_: Request) => ({ id: "fakeId" });
 
 export const fileRouter = {
   //Small max size to protect my free quota
   videoUploader: f({ video: { maxFileSize: "128MB" } })
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
-      const user = await auth(req);
-      // Will never happen
-      if (!user) throw new UploadThingError("Unauthorized");
+      const user = auth(req);
+      if (!user) throw new UploadThingError("Unauthorized"); // Will never happen
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
