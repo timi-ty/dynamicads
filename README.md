@@ -25,7 +25,8 @@ However, there were a few challenges that were solved by coloring outside the li
 4. **Automatic redirects:** This page uses automatic redirects to steer users to the implemented page at "/ads/[episode]". Other pages are stubs.
 
 5. **Scrubber.tsx:** This is the most complex component in this application. It tightly mananges video scrubbing while also indicating video play time. This means it is both a consumer and a publisher of the video time. This requirement forced some custom logic, most notably:
-   a. Wrapping values in refs to escape closures and to listen/react to window level mouse events without having to remove and re-attach the listeners on component updates.
+
+   - Wrapping values in refs to escape closures and to listen/react to window level mouse events without having to remove and re-attach the listeners on component updates.
 
    ```javascript
    // This effect ensures that if mouse down was triggered by the scrubber, any mouse events anywhere are handled by the scrubber.
@@ -52,7 +53,7 @@ However, there were a few challenges that were solved by coloring outside the li
    }, []);
    ```
 
-   b. Injecting scrubber time value updates and a video reference into an existing react context tree from within the tree itself. This is not done within the Scrubber.tsx component but is done because of it.
+   - Injecting scrubber time value updates and a video reference into an existing react context tree from within the tree itself. This is not done within the Scrubber.tsx component but is done because of it.
 
    ```javascript
    function EpisodeVideoContextProvider({
@@ -78,7 +79,7 @@ However, there were a few challenges that were solved by coloring outside the li
    }
    ```
 
-   c. Using an effect without specifying all its dependencies in the dependency array.
+   - Using an effect without specifying all its dependencies in the dependency array.
 
    ```javascript
    // When we get an updated video time, it means the seek is settled.
