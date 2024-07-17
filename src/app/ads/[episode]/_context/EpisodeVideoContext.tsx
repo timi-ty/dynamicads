@@ -1,10 +1,11 @@
 "use client";
 
-import { createContext, type ReactNode, useState } from "react";
+import { createContext, type ReactNode, useEffect, useState } from "react";
 import {
   useVideoControls,
   type VideoControls,
 } from "../_hooks/useVideoControls";
+import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
 
 export interface Episode {
   id: number;
@@ -31,6 +32,12 @@ export function EpisodeVideoContextProvider({
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
   const [scrubberTime, setScrubberTime] = useState(0);
   const videoControls = useVideoControls(video);
+  const { invalidateActionStack } = useGlobalActionStack();
+
+  useEffect(() => {
+    invalidateActionStack(); // Instead of handling different action stacks per episode, start fresh every time a different episode is picked.
+  }, [episode]);
+
   return (
     <EpisodeVideoContext.Provider
       value={{
