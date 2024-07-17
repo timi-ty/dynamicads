@@ -9,14 +9,14 @@ This project uses the following technologies:
 - [Prisma](https://prisma.io) - ORM
 - [Tailwind CSS](https://tailwindcss.com) - Inline styles
 - [tRPC](https://trpc.io) - Typed remote procedure calls with react-query batteries
-- [Jotai](https://jotai.org/) - Atomic state management
+- [Jotai](https://jotai.org/) - Atomic global state management
 - [Uploadthing](https://uploadthing.com/) - File upload
 
 This project generally follows standard React.js best practices, and colors within the lines of the technologies used to get the best out of them.
 
 However, there were a few challenges that were solved by coloring outside the lines a little:
 
-1. **Fake username/password credential authentication with NextAuth.js:** This was done to make the process of testing the app as easy as possible. Any username/password combination either logs you in or creates a new user with the credentials. Credentials are stored plainly in the Postgresql db for easy retrieval.
+1. **Fake username/password credential authentication with NextAuth.js:** This was done to make the process of testing the app as easy as possible. Any username/password combination either logs you in or creates a new user with the credentials. Credentials are stored plainly in the PostgreSQL db for easy retrieval.
 
 2. **PostgreSQL database:** This project runs on a single PostreSQL instance running in an Ubuntu instance on AWS Lightsail. It has relaxed security rules for testing convenience.
 
