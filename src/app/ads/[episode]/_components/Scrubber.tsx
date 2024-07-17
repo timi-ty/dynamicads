@@ -21,6 +21,7 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   // This handles the situation where the thumb is used to seek.
   const [isSeeking, setIsSeeking] = useState(false);
   const [lastSeekPosition, setLastSeekPosition] = useState(0);
+  const [isSeekSettled, setIsSeekSettled] = useState(true); // We initially are not seeking and so seek starts as settled.
   const { relativeMousePos: pinkAreaMouseSeekingPos } = useRelativeMousePos(
     pinkAreaRef.current,
     isSeeking,
@@ -29,7 +30,6 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   const pinkAreaWidth = defaultPickAreaWidth * zoom;
   const thumbProgress = (videoTime / videoLength) * pinkAreaWidth;
 
-  const [isSeekSettled, setIsSeekSettled] = useState(true); // We initially are not seeking and so seek starts as settled.
   function handleSeek(clientMousePosX: number) {
     if (!pinkAreaRef.current) return;
 
@@ -46,9 +46,9 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
     seek(seekPoint);
   }
 
-  // When we get an updated video time, we check if it is close enough to the current seek point to consider the seek as settled.
+  // When we get an updated video time, it means the seek is settled.
   useEffect(() => {
-    publishScrubberTime(videoTime); // Keep the scrubber time in sync with the video time when the seek is settled.
+    publishScrubberTime(videoTime); // Keep the scrubber time in sync with the video time.
     setIsSeekSettled(true);
   }, [videoTime]); // This effect should only fire stricly when the videoTime updates. The functions used inside do not change between renders.
 

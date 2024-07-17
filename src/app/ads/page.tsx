@@ -6,15 +6,19 @@ import { useEffect } from "react";
 import usePickedEpisodeId from "../_hooks/usePickedEpisodeId";
 import { api } from "~/trpc/react";
 import CreateEpisodeButton from "../_components/CreateEpisode";
+import useGlobalActionStack from "../_hooks/useGlobalActionStack";
 
 export default function AdsPage() {
   const router = useRouter();
   const { data, error, isLoading } = api.episode.getAll.useQuery();
   const [pickedEpisodeId, setPickedEpisodeId] = usePickedEpisodeId();
+  const { invalidateActionStack } = useGlobalActionStack();
 
   useEffect(() => {
     // If the ads page is showing, navigate to the picked episode.
     // If there is no valid episode, but there is data, pick the first episode on the list.
+
+    invalidateActionStack(); // Instead of handling different action stacks per episode, start fresh every time a different episode is picked.
 
     if (error ?? data?.error) return;
 

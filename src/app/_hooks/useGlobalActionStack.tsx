@@ -18,12 +18,9 @@ export default function useGlobalActionStack() {
   const [undoActionStack, setUndoActionStack] = useAtom(undoActionStackAtom);
   const [redoActionStack, setRedoActionStack] = useAtom(redoActionStackAtom);
 
-  // In any situation where there is a risk of the stack getting corrupted, we invalidate the redo stack to keep the undo stack safe.
-  function invalidateRedoStack() {
+  // In any situation where stack is corrupted or no longer valid, we clear it.
+  function invalidateActionStack() {
     setRedoActionStack([]);
-  }
-
-  function invalidateUndoStack() {
     setUndoActionStack([]);
   }
 
@@ -61,7 +58,7 @@ export default function useGlobalActionStack() {
 
       // Clear the redo stack every time a new organic action is done.
       // Being able to redo an old action is counter-inuitive and erroneous if the actions can depend on each other.
-      invalidateRedoStack();
+      setRedoActionStack([]);
     } catch {
       return null;
     }
@@ -76,8 +73,7 @@ export default function useGlobalActionStack() {
       // If the undo action returns null, it means the action could not revert the application state back to exactly where it was before.
       // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
       if (undoActionResult === null) {
-        invalidateRedoStack();
-        invalidateUndoStack();
+        invalidateActionStack();
         return null;
       }
       const reconstructedAction = {
@@ -86,7 +82,7 @@ export default function useGlobalActionStack() {
           try {
             return await action.primary(undoActionResult);
           } catch {
-            return null; // Break and invalidate
+            return null; // Break and invalidate.
           }
         },
       };
@@ -103,8 +99,7 @@ export default function useGlobalActionStack() {
       // If the redo action returns null, it means the action could not revert the application state back to exactly where it was before.
       // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
       if (redoActionResult === null) {
-        invalidateRedoStack();
-        invalidateUndoStack();
+        invalidateActionStack();
         return null;
       }
       const reconstructedAction = {
@@ -127,5 +122,6 @@ export default function useGlobalActionStack() {
     redoAction,
     canUndo: undoActionStack.length > 0,
     canRedo: redoActionStack.length > 0,
+    invalidateActionStack,
   };
 }

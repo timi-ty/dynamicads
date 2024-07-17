@@ -45,7 +45,7 @@ export default function CreateEpisodeButton() {
     <>
       {/*Here we overlap the upload thing upload button on ours and make it
       transparent so that it can handle the click without affecting the UI. 
-      Using upload thing for ease only. Would use direct s3 in production.*/}
+      Using upload thing for ease only. Would use direct s3 otherwise.*/}
       <div className="font-inter pointer-events-none relative w-64 rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-center text-sm font-medium text-zinc-50">
         <span>Create an episode</span>
         <UploadButton
