@@ -18,7 +18,7 @@ However, there were a few challenges that were solved by coloring outside the li
 
 1. **Fake username/password credential authentication with NextAuth.js:** This was done to make the process of testing the app as easy as possible. Any username/password combination either logs you in or creates a new user with the credentials. Credentials are stored plainly in the PostgreSQL db for easy retrieval.
 
-2. **PostgreSQL database:** This project runs on a single PostreSQL instance running in an Ubuntu instance on AWS Lightsail. It has relaxed security rules for testing convenience.
+2. **PostgreSQL database:** This project runs on a single PostgreSQL instance running in an Ubuntu instance on AWS Lightsail. It has relaxed security rules for testing convenience.
 
 3. **Custom dropdown & switch:** This project uses two custom components that could otherwise be sourced from a standard component library. This was done to avoid more dependencies/imports for an otherwise lightweight test project.
 
