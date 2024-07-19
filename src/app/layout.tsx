@@ -37,8 +37,8 @@ export default async function RootLayout({
                     userName={session.user.name}
                   />
                   <div className="middle flex flex-row">
-                    <SideNav className="fixed bottom-0 left-0 top-0 z-30 h-full flex-shrink-0 overflow-y-auto border-r bg-zinc-50 sm:relative" />
-                    <main className="h-full flex-grow overflow-auto bg-zinc-50 p-14">
+                    <SideNav className="fixed bottom-0 left-0 top-0 z-30 h-full flex-shrink-0 overflow-y-auto border-r bg-zinc-50 xl:relative" />
+                    <main className="h-full flex-grow overflow-auto bg-zinc-50 p-8 2xl:p-14">
                       {children}
                     </main>
                   </div>

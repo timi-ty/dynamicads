@@ -20,7 +20,7 @@ export default function VideoPlayer({
 
   return (
     <div className={className}>
-      <div className="flex h-[552px] w-[788px] flex-col justify-between rounded-2xl border bg-white p-8 shadow">
+      <div className="flex h-full flex-col gap-4 rounded-2xl border bg-white p-8 shadow">
         <div className="relative w-full">
           <video
             ref={videoRef}

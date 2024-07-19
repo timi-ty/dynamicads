@@ -23,14 +23,14 @@ export default function AdMarkers({
 
 function AdMarkersCard() {
   const { controls, episode } = useContext(EpisodeVideoContext);
-  let { data, error } = api.marker.getAll.useQuery({ episodeId: episode.id });
+  const { data, error } = api.marker.getAll.useQuery({ episodeId: episode.id });
 
   const hasError = error ?? data?.error; // To be used for truthy or falsy value
 
   if (!hasError && !data) return <Loader />;
 
   return (
-    <div className="flex h-full min-w-[412px] flex-col justify-between rounded-2xl border bg-white pb-8 pt-8 shadow">
+    <div className="flex h-full flex-col justify-between rounded-2xl border bg-white pb-8 pt-8 shadow">
       <div>
         <div className="flex flex-row justify-between pe-8 ps-8">
           <span className="text-zinc-800">Ad markers</span>
@@ -74,7 +74,7 @@ function AdMarkersCard() {
 
 function Loader() {
   return (
-    <div className="flex h-full min-w-[412px] flex-col items-center justify-center gap-12 rounded-2xl border bg-white p-8 text-zinc-500 shadow">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-12 rounded-2xl border bg-white p-8 text-zinc-500 shadow">
       <span>Loading Markers</span>
       <Image
         src="/spinner.svg"

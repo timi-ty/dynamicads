@@ -18,12 +18,12 @@ export default function SideNav({
 
   return (
     <nav
-      className={`${className} transition-transform sm:translate-x-0 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+      className={`${className} transition-transform xl:translate-x-0 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
       <button
         onClick={() => closeMenu()}
         type="button"
-        className="m-8 sm:hidden"
+        className="m-8 xl:hidden"
       >
         <Image
           src={isMenuOpen ? "/ic_return.svg" : "/ic_hamburger.svg"}

@@ -19,7 +19,7 @@ export default function TopNav({
           <button
             onClick={() => toggleMenu()}
             type="button"
-            className="sm:hidden"
+            className="xl:hidden"
           >
             <Image
               src={isMenuOpen ? "/ic_return.svg" : "/ic_hamburger.svg"}
