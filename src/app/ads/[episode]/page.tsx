@@ -40,7 +40,7 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
           </span>
         </div>
         <EpisodeVideoContextProvider episode={data.episode}>
-          <div className="mt-8 flex flex-row gap-8">
+          <div className="mt-8 flex min-h-96 flex-col-reverse gap-8 sm:flex-row">
             <AdMarkers />
             <VideoPlayer />
           </div>
