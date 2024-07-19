@@ -48,7 +48,7 @@ export default async function RootLayout({
                 <ModalOverlay>
                   <Link
                     href={"/api/auth/signin"}
-                    className="font-inter block w-64 rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-center text-sm font-medium text-zinc-50"
+                    className="font-inter block rounded-md bg-zinc-900 p-4 pb-3 pt-3 text-center text-sm font-medium text-zinc-50"
                   >
                     Sign In
                   </Link>

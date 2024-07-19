@@ -5,7 +5,7 @@ export default function Footer({
 }: Readonly<{ className?: string }>) {
   return (
     <footer className={className}>
-      <div className="flex flex-row items-center justify-between p-16 pb-[37px] pt-[37px]">
+      <div className="flex flex-row items-center justify-between p-6 pb-[37px] pt-[37px] sm:pe-16 sm:ps-16">
         <span className="font-semibold text-zinc-500">
           Video first podcasts
         </span>

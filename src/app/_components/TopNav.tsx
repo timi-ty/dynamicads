@@ -10,7 +10,7 @@ export default function TopNav({
 }: Readonly<{ className?: string; userName: string }>) {
   return (
     <nav className={className}>
-      <div className="flex flex-row items-center justify-between p-16 pb-6 pt-6">
+      <div className="flex flex-row items-center justify-between p-6 pb-6 pt-6 sm:pe-16 sm:ps-16">
         <Link href={"/"} className="flex flex-row items-center gap-4">
           <Image src={"/ic_brandmark.svg"} alt="logo" width={24} height={24} />
           <div className="text-2xl">Vidpod</div>
