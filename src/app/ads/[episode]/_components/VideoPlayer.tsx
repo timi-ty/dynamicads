@@ -60,10 +60,10 @@ function VideoControlsView({
   return (
     <div className={className}>
       <div
-        className={`flex h-16 flex-row items-center justify-between rounded-2xl border bg-white p-4 text-sm font-semibold text-zinc-500 shadow ${disabled ? "pointer-events-none opacity-30" : ""}`}
+        className={`flex h-16 w-full flex-row items-center justify-between rounded-2xl border bg-white p-4 text-sm font-semibold text-zinc-500 shadow ${disabled ? "pointer-events-none opacity-30" : ""}`}
       >
         <button
-          className="group flex flex-row items-center gap-2 rounded-xl p-2 active:text-zinc-900"
+          className="group flex flex-row items-center gap-2 rounded-xl p-2 active:text-zinc-900 max-[800px]:invisible max-[800px]:w-0 lg:max-[1200px]:invisible lg:max-[1200px]:w-0 xl:max-[1590px]:invisible xl:max-[1590px]:w-0"
           onClick={jumpToStart}
           type="button"
         >
@@ -130,7 +130,7 @@ function VideoControlsView({
           </button>
         </span>
         <button
-          className="group flex flex-row items-center gap-2 rounded-xl p-2 active:text-zinc-900"
+          className="group flex flex-row items-center gap-2 rounded-xl p-2 active:text-zinc-900 max-[800px]:invisible max-[800px]:w-0 lg:max-[1200px]:invisible lg:max-[1200px]:w-0 xl:max-[1590px]:invisible xl:max-[1590px]:w-0"
           onClick={jumpToEnd}
           type="button"
         >

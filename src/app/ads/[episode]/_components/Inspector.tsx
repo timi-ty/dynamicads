@@ -14,12 +14,12 @@ export default function Inspector({
 }>) {
   const minZoomIndex = 0;
   const maxZoomIndex = 1;
-  const [zoomIndex, setZoomIndex] = useState(0);
+  const [zoomIndex, setZoomIndex] = useState(0.5);
   const videoContext = useContext(EpisodeVideoContext);
 
   return (
     <div className={className}>
-      <div className="flex min-h-[358px] min-w-[1232px] flex-col justify-between rounded-2xl border bg-white p-8 shadow">
+      <div className="flex min-h-[358px] flex-col justify-between rounded-2xl border bg-white p-8 shadow">
         <Controls
           zoomIndex={zoomIndex}
           setZoomIndex={(index) => setZoomIndex(index)}
@@ -49,7 +49,7 @@ function Controls({
   const { canUndo, canRedo, undoAction, redoAction } = useGlobalActionStack();
 
   return (
-    <div className="flex flex-row items-center justify-between text-zinc-500">
+    <div className="flex flex-col-reverse items-center justify-between gap-4 text-zinc-500 md:flex-row">
       <div className="flex flex-row items-center gap-12 text-sm">
         <button
           className={`group flex flex-row items-center gap-3 ${canUndo ? "" : "opacity-60"}`}

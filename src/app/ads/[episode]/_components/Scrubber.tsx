@@ -9,7 +9,7 @@ import Image from "next/image";
 import { millisecondsToHHMMSS } from "~/utils/format";
 import { api } from "~/trpc/react";
 
-const defaultPickAreaWidth = 1134; //cherry picked px value to fit the entire scrubber within the inspector.
+const defaultPickAreaWidth = 1134; //cherry picked px value.
 
 export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   const { controls: videoControls, publishScrubberTime } =
