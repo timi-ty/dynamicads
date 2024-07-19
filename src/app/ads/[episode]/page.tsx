@@ -29,11 +29,11 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
 
   if (data?.episode)
     return (
-      <div className="min-w-[1232px]">
+      <div>
         <Link href={"/"} className="link text-sm text-zinc-500">
           {"<-"} Ads
         </Link>
-        <div className="mt-4 max-w-[616px] text-3xl">{data.episode.name}</div>
+        <div className="mt-4 max-w-xl text-3xl">{data.episode.name}</div>
         <div className="mt-4 text-zinc-500">
           <span>
             Episode {data.episode.id} • {data.episode.createdAt.toDateString()}
@@ -41,12 +41,8 @@ async function EpisodeViewer({ episodeId }: Readonly<{ episodeId: number }>) {
         </div>
         <EpisodeVideoContextProvider episode={data.episode}>
           <div className="mt-8 flex flex-row gap-8">
-            <span>
-              <AdMarkers />
-            </span>
-            <span>
-              <VideoPlayer />
-            </span>
+            <AdMarkers />
+            <VideoPlayer />
           </div>
           <Inspector className="mt-8" />
         </EpisodeVideoContextProvider>

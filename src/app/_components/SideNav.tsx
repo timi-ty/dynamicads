@@ -6,17 +6,33 @@ import EpisodePicker from "./EpisodePicker";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Switch from "../_generic_components/Switch";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import MenuStateContext from "../_context/MenuStateContext";
 
 export default function SideNav({
   className,
 }: Readonly<{ className?: string }>) {
   const pathName = usePathname();
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const { isMenuOpen, closeMenu } = useContext(MenuStateContext);
 
   return (
-    <nav className={className}>
-      <div className="w-80 overflow-x-hidden p-8">
+    <nav
+      className={`${className} transition-transform sm:translate-x-0 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+    >
+      <button
+        onClick={() => closeMenu()}
+        type="button"
+        className="m-8 sm:hidden"
+      >
+        <Image
+          src={isMenuOpen ? "/ic_return.svg" : "/ic_hamburger.svg"}
+          alt="menu"
+          width={24}
+          height={24}
+        />
+      </button>
+      <div className="min-w-80 p-8">
         <CreateEpisodeButton />
         <EpisodePicker className="mt-4" />
         <div className="mt-8 flex flex-col gap-8 pe-8 ps-8">

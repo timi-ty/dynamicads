@@ -10,6 +10,7 @@ import TopNav from "./_components/TopNav";
 import ModalOverlay from "./_generic_components/ModalOverlay";
 import { getServerAuthSession } from "~/server/auth";
 import AtomProvider from "~/jotai/react";
+import { MenuStateContextProvider } from "./_context/MenuStateContext";
 
 const manrope = Manrope({ subsets: ["latin"], weight: "700" });
 
@@ -30,19 +31,19 @@ export default async function RootLayout({
           <TRPCReactProvider>
             <HydrateClient>
               {session && (
-                <>
+                <MenuStateContextProvider>
                   <TopNav
                     className="top-nav z-10 overflow-visible border-b bg-zinc-50"
                     userName={session.user.name}
                   />
                   <div className="middle flex flex-row">
-                    <SideNav className="h-full flex-shrink-0 overflow-y-auto border-r bg-zinc-50" />
+                    <SideNav className="fixed bottom-0 left-0 top-0 z-30 h-full flex-shrink-0 overflow-y-auto border-r bg-zinc-50 sm:relative" />
                     <main className="h-full flex-grow overflow-auto bg-zinc-50 p-14">
                       {children}
                     </main>
                   </div>
-                  <Footer className="border-t bg-zinc-50" />
-                </>
+                  <Footer className="z-10 border-t bg-zinc-50" />
+                </MenuStateContextProvider>
               )}
               {!session && (
                 <ModalOverlay>
