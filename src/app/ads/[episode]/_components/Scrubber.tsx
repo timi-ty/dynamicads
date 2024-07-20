@@ -14,7 +14,8 @@ const defaultPickAreaWidth = 1134; //cherry picked px value.
 export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   const { controls: videoControls, publishScrubberTime } =
     useContext(EpisodeVideoContext);
-  const { videoLength, videoTime, seek } = videoControls;
+  const { videoLength, videoTime, seek, addSmoothTimeUpdateListener } =
+    videoControls;
   // The pink area is the important part of the scrubber. It is the part that matches theh video length.
   const pinkAreaRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +29,9 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   );
 
   const pinkAreaWidth = defaultPickAreaWidth * zoom;
-  const thumbProgress = (videoTime / videoLength) * pinkAreaWidth;
+  const [thumbProgress, setThumbProgress] = useState(
+    (videoTime / videoLength) * pinkAreaWidth,
+  );
 
   function handleSeek(clientMousePosX: number) {
     if (!pinkAreaRef.current) return;
@@ -45,6 +48,15 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
     publishScrubberTime(seekPoint); // Make the scrubber time available even before seek settles.
     seek(seekPoint);
   }
+
+  useEffect(() => {
+    const smoothTimeUpdateListener = addSmoothTimeUpdateListener(
+      (smoothVideoTime) => {
+        setThumbProgress((smoothVideoTime / videoLength) * pinkAreaWidth);
+      },
+    );
+    return () => smoothTimeUpdateListener.remove();
+  }, []);
 
   // When we get an updated video time, it means the seek is settled.
   useEffect(() => {

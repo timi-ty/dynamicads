@@ -6,6 +6,7 @@ import {
   type VideoControls,
 } from "../_hooks/useVideoControls";
 import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
+import { Listener } from "~/app/_hooks/useListenerGroup";
 
 export interface Episode {
   id: number;
@@ -89,6 +90,11 @@ const defaultConsumer: EpisodeVideoConsumer = {
     },
     isBuffering: false,
     isReady: false,
+    addSmoothTimeUpdateListener: function (
+      onTimeUpdate: (videoTime: number) => void,
+    ): Listener {
+      throw new Error("Function not implemented.");
+    },
   },
   episode: {
     id: 0,

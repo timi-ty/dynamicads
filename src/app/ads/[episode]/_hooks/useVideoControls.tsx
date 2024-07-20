@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import useAnimationManager from "~/app/_hooks/useAnimationManager";
+import useListenerGroup, { Listener } from "~/app/_hooks/useListenerGroup";
 import { clamp } from "~/utils/math";
 
 // This entire hook has to handle the case where the video element is not yet mounted and the controls do nothing.
@@ -11,6 +13,13 @@ export function useVideoControls(
   const [isBuffering, setIsBuffering] = useState(false);
   const [videoLength, setVideoLength] = useState(0);
   const [videoTime, setVideoTime] = useState(0);
+
+  const smoothVideoTime = useRef(0);
+  const { startAnimation } = useAnimationManager();
+  const {
+    addListener: addListenerVideoTime,
+    callListeners: callVideoTimeListeners,
+  } = useListenerGroup();
 
   // These are data with actions (side effects). They do what the say.
   const [isRewinding, setIsRewinding] = useState(false);
@@ -26,6 +35,11 @@ export function useVideoControls(
     // This local const allows the callbacks to create valid closures on the video element reference.
     // Even if the video changes, the effect can be cleaned up on the correct (old) video.
     const currentVideo = video;
+
+    function updateSmoothVideoTime() {
+      smoothVideoTime.current = currentVideo.currentTime;
+      callVideoTimeListeners();
+    }
 
     function handlePlay() {
       setIsPaused(false);
@@ -47,6 +61,8 @@ export function useVideoControls(
     // Immediately call these two in case they are set before the effect runs.
     setVideoLength(currentVideo.duration);
     setVideoTime(currentVideo.currentTime);
+
+    const smoothVideoTimeAnimation = startAnimation(updateSmoothVideoTime);
     currentVideo.addEventListener("play", handlePlay);
     currentVideo.addEventListener("pause", handlePause);
     currentVideo.addEventListener("ended", handlePause);
@@ -54,6 +70,7 @@ export function useVideoControls(
     currentVideo.addEventListener("timeupdate", handleTimeUpdate);
     currentVideo.addEventListener("waiting", handleWaiting);
     return () => {
+      smoothVideoTimeAnimation.stop();
       currentVideo.removeEventListener("play", handlePlay);
       currentVideo.removeEventListener("pause", handlePause);
       currentVideo.removeEventListener("ended", handlePause);
@@ -171,6 +188,14 @@ export function useVideoControls(
     video.currentTime = seekTime;
   }
 
+  // Components that set state in their smooth time update listener will rerender a lot - at the screen refresh rate.
+  // Doing animations through react rerenders is not the best for performance, but results in cleaner code.
+  function addSmoothTimeUpdateListener(
+    onTimeUpdate: (videoTime: number) => void,
+  ) {
+    return addListenerVideoTime(() => onTimeUpdate(video?.currentTime ?? 0));
+  }
+
   return {
     isPaused,
     isBuffering,
@@ -187,6 +212,7 @@ export function useVideoControls(
     jumpToStart,
     jumpToEnd,
     seek,
+    addSmoothTimeUpdateListener,
   };
 }
 
@@ -206,4 +232,7 @@ export type VideoControls = {
   jumpToStart: () => void;
   jumpToEnd: () => void;
   seek: (seconds: number) => void;
+  addSmoothTimeUpdateListener: (
+    onTimeUpdate: (videoTime: number) => void,
+  ) => Listener;
 };
