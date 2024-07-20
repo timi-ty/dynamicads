@@ -2,32 +2,36 @@ import { useCallback, useRef } from "react";
 
 export default function useAnimationManager() {
   const lastUsedId = useRef(0);
-  const processIds = useRef(new Set<number>());
+  const animations = useRef(new Map<number, number>()); // Maps animationProcessIds to their lastUpdatedTime.
 
-  const createAnimationId = useCallback(() => {
+  const createAnimation = useCallback(() => {
     const id = lastUsedId.current++;
-    processIds.current.add(id); // This is guaranteed to never use the same id twice.
+    animations.current.set(id, Date.now()); // This is guaranteed to never use the same id twice.
     return id;
   }, []);
 
-  // The update function does not receive the time delta because it is not needed for now.
   const startAnimation = useCallback(
-    (update: () => void): Animation => {
-      const animationProcessId = createAnimationId();
+    (update: ((deltaTime: number) => void) | (() => void)): Animation => {
+      const animationProcessId = createAnimation();
       function updateAnimation() {
-        update();
-        if (!processIds.current.has(animationProcessId)) return; // If the animation process has been stopped, don't queue the next frame.
+        if (!animations.current.has(animationProcessId)) return; // If the animation process has been stopped, don't queue the next frame.
+        const currentTime = Date.now();
+        const lastTime =
+          animations.current.get(animationProcessId) ?? currentTime; // If the animation does not exist then deltaTime will be 0.
+        const deltaTime = (currentTime - lastTime) * 0.001; // deltaTime is in seconds.
+        animations.current.set(animationProcessId, currentTime);
+        update(deltaTime);
         requestAnimationFrame(updateAnimation);
       }
       updateAnimation();
 
       return {
         stop: () => {
-          processIds.current.delete(animationProcessId);
+          animations.current.delete(animationProcessId);
         },
       };
     },
-    [createAnimationId],
+    [createAnimation],
   );
 
   return { startAnimation };

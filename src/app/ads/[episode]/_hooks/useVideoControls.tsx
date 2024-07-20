@@ -3,6 +3,9 @@ import useAnimationManager from "~/app/_hooks/useAnimationManager";
 import useListenerGroup, { type Listener } from "~/app/_hooks/useListenerGroup";
 import { clamp } from "~/utils/math";
 
+const rewindRate = 3;
+const fastforwardRate = 3; // These can be converted to variables to have changing rewind/fastforward rates at runtime.
+
 // This entire hook has to handle the case where the video element is not yet mounted and the controls do nothing.
 // A null check is performed before any operation.
 export function useVideoControls(
@@ -24,10 +27,6 @@ export function useVideoControls(
   // These are data with actions (side effects). They do what the say.
   const [isRewinding, setIsRewinding] = useState(false);
   const [isFastforwarding, setIsFastforwarding] = useState(false);
-
-  // These are handles for window.setInterval() calls.
-  const rewindHandle = useRef<number | null>(null);
-  const fastforwardHandle = useRef<number | null>(null);
 
   useEffect(() => {
     if (!video) return;
@@ -81,49 +80,30 @@ export function useVideoControls(
 
   // Effect to handle rewinding.
   useEffect(() => {
-    if (!video) return;
-    if (!isRewinding) {
-      if (rewindHandle.current) window.clearInterval(rewindHandle.current);
-      return;
-    }
+    if (!video || !isRewinding) return;
+    const currentVideo = video;
 
     video.pause(); // Always pause before rewinding.
     setIsFastforwarding(false); // Cannot fastforward and rewind at the same time.
-    if (rewindHandle.current) window.clearInterval(rewindHandle.current);
-    // Kind of x2 rewind. Not really because the rate of setInterval calls is not guaranteed.
-    // This is not a very good implentation but negative playback rate is not supported.
-    rewindHandle.current = window.setInterval(() => {
-      video.currentTime -= 3.0;
-    }, 1000);
-
-    return () => {
-      if (rewindHandle.current) window.clearInterval(rewindHandle.current);
-    };
+    function updateRewind(deltaTime: number) {
+      currentVideo.currentTime -= deltaTime * rewindRate;
+    }
+    const rewindAnimation = startAnimation(updateRewind);
+    return () => rewindAnimation.stop();
   }, [isRewinding, video]);
 
   // Effect to handle fastforwarding.
   useEffect(() => {
-    if (!video) return;
-    if (!isFastforwarding) {
-      if (fastforwardHandle.current)
-        window.clearInterval(fastforwardHandle.current);
-      return;
-    }
+    if (!video || !isFastforwarding) return;
+    const currentVideo = video;
 
     video.pause(); // Always pause before fastforwarding.
     setIsRewinding(false); // Cannot rewind and fastforward at the same time.
-    if (fastforwardHandle.current)
-      window.clearInterval(fastforwardHandle.current);
-    // Kind of x3 fastforward. Not really because the rate of setInterval calls is not guaranteed.
-    // This is not a very good implentation but negative playback rate is not supported.
-    fastforwardHandle.current = window.setInterval(() => {
-      video.currentTime += 3.0;
-    }, 1000);
-
-    return () => {
-      if (fastforwardHandle.current)
-        window.clearInterval(fastforwardHandle.current);
-    };
+    function updateFastforward(deltaTime: number) {
+      currentVideo.currentTime += deltaTime * fastforwardRate;
+    }
+    const fastforwardAnimation = startAnimation(updateFastforward);
+    return () => fastforwardAnimation.stop();
   }, [isFastforwarding, video]);
 
   const controls = useMemo(() => {
