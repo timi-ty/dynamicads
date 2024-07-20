@@ -1,4 +1,5 @@
 import { atom, useAtom } from "jotai";
+import { useCallback } from "react";
 
 // Atoms that make the undo/redo stacks global states.
 const undoActionStackAtom = atom<object[]>([]);
@@ -19,10 +20,10 @@ export default function useGlobalActionStack() {
   const [redoActionStack, setRedoActionStack] = useAtom(redoActionStackAtom);
 
   // In any situation where stack is corrupted or no longer valid, we clear it.
-  function invalidateActionStack() {
+  const invalidateActionStack = useCallback(() => {
     setRedoActionStack([]);
     setUndoActionStack([]);
-  }
+  }, [setRedoActionStack, setUndoActionStack]);
 
   // Use this to do a reversible action. It captures the action and adds it to the undo stack.
   // If the primary action returns null, the action is not pushed to the stack and cannot be undone, this should be the case if the primary action failed.
