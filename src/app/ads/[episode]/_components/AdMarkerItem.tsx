@@ -102,9 +102,9 @@ export default function AdMarkerItem({
   }
 
   return (
-    <div className="flex flex-row items-center justify-between gap-4">
+    <div className="flex w-full flex-row items-center justify-between gap-4">
       <div>{index}</div>
-      <div className="flex flex-shrink-0 flex-grow flex-row items-center justify-between gap-4 rounded-lg border p-4 pb-3 pt-3 font-semibold shadow">
+      <div className="flex w-full flex-shrink-0 flex-grow flex-row items-center justify-between gap-4 rounded-lg border p-4 pb-3 pt-3 font-semibold shadow">
         <div className="flex flex-row items-center gap-4">
           <span className="text-zinc-800">{millisecondsToHHMMSS(value)}</span>
           <span

@@ -83,7 +83,6 @@ export function useVideoControls(
     if (!video || !isRewinding) return;
     const currentVideo = video;
 
-    video.pause(); // Always pause before rewinding.
     setIsFastforwarding(false); // Cannot fastforward and rewind at the same time.
     function updateRewind(deltaTime: number) {
       currentVideo.currentTime -= deltaTime * rewindRate;
@@ -97,7 +96,6 @@ export function useVideoControls(
     if (!video || !isFastforwarding) return;
     const currentVideo = video;
 
-    video.pause(); // Always pause before fastforwarding.
     setIsRewinding(false); // Cannot rewind and fastforward at the same time.
     function updateFastforward(deltaTime: number) {
       currentVideo.currentTime += deltaTime * fastforwardRate;
