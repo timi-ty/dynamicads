@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useRef } from "react";
 
 export default function useAnimationManager() {
   const lastUsedId = useRef(0);
