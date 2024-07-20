@@ -45,7 +45,6 @@ function Controls({
   zoomOpts?: { minZoomIndex?: number; maxZoomIndex?: number };
 }>) {
   const videoContext = useContext(EpisodeVideoContext);
-  const scrubberTime = videoContext.scrubberTime;
   const { canUndo, canRedo, undoAction, redoAction } = useGlobalActionStack();
 
   return (
@@ -87,7 +86,7 @@ function Controls({
         </button>
       </div>
       <span className="rounded-md border p-3 pb-2 pt-2">
-        {millisecondsToHHMMSS(scrubberTime * 1000)}
+        {millisecondsToHHMMSS(videoContext.getScrubberTime() * 1000)}
       </span>
       <ZoomSlider
         zoomIndex={zoomIndex}

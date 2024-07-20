@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import usePickedEpisodeId from "../_hooks/usePickedEpisodeId";
 import { api } from "~/trpc/react";
 import CreateEpisodeButton from "../_components/CreateEpisode";
-import useGlobalActionStack from "../_hooks/useGlobalActionStack";
 
 export default function AdsPage() {
   const router = useRouter();

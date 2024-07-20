@@ -1,91 +1,36 @@
-import { useContext, useRef, useState, useEffect, useMemo } from "react";
+import { useContext, useRef, useMemo } from "react";
 import { clamp } from "~/utils/math";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
-import {
-  useRelativeMousePos,
-  windowToConatainerPoint,
-} from "../_hooks/useMousePos";
+import { windowToConatainerPoint } from "../_hooks/useMousePos";
 import Image from "next/image";
 import { millisecondsToHHMMSS } from "~/utils/format";
 import { api } from "~/trpc/react";
+import ScrubberThumb from "./ScrubberThumb";
 
 const defaultPickAreaWidth = 1134; //cherry picked px value.
 
 export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   const { controls: videoControls, publishScrubberTime } =
     useContext(EpisodeVideoContext);
-  const { videoLength, videoTime, seek, addSmoothTimeUpdateListener } =
-    videoControls;
+  const { videoLength, seek } = videoControls;
+
   // The pink area is the important part of the scrubber. It is the part that matches theh video length.
   const pinkAreaRef = useRef<HTMLDivElement>(null);
-
-  // This handles the situation where the thumb is used to seek.
-  const [isSeeking, setIsSeeking] = useState(false);
-  const [lastSeekPosition, setLastSeekPosition] = useState(0);
-  const [isSeekSettled, setIsSeekSettled] = useState(true); // We initially are not seeking and so seek starts as settled.
-  const { relativeMousePos: pinkAreaMouseSeekingPos } = useRelativeMousePos(
-    pinkAreaRef.current,
-    isSeeking,
-  );
-
   const pinkAreaWidth = defaultPickAreaWidth * zoom;
-  const [thumbProgress, setThumbProgress] = useState(
-    (videoTime / videoLength) * pinkAreaWidth,
-  );
 
   function handleSeek(clientMousePosX: number) {
     if (!pinkAreaRef.current) return;
 
-    setIsSeekSettled(false);
     const relativeMousePos = windowToConatainerPoint(pinkAreaRef.current, {
       x: clientMousePosX,
       y: 0,
     });
     const clampedSeekPos = clamp(relativeMousePos.x, 0, pinkAreaWidth);
-    setLastSeekPosition(clampedSeekPos); // We cache this to prevent the thumb from jumping to an old position while the seek is processing.
     let seekPoint = (clampedSeekPos / pinkAreaWidth) * videoLength;
     seekPoint = clamp(seekPoint, 0, videoLength); // Another clamp just for safety.
     publishScrubberTime(seekPoint); // Make the scrubber time available even before seek settles.
     seek(seekPoint);
   }
-
-  useEffect(() => {
-    const smoothTimeUpdateListener = addSmoothTimeUpdateListener(
-      (smoothVideoTime) => {
-        setThumbProgress((smoothVideoTime / videoLength) * pinkAreaWidth);
-      },
-    );
-    return () => smoothTimeUpdateListener.remove();
-  }, []);
-
-  // When we get an updated video time, it means the seek is settled.
-  useEffect(() => {
-    publishScrubberTime(videoTime); // Keep the scrubber time in sync with the video time.
-    setIsSeekSettled(true);
-  }, [videoTime]); // This effect should only fire stricly when the videoTime updates. The functions used inside do not change between renders.
-
-  // This effect ensures that if mouse down was triggered by this scrubber, any mouse events anywhere are handled by the scrubber.
-  const handleSeekRef = useRef(handleSeek); // Create a reference to handleSeek to escape the closure.
-  const isSeekingRef = useRef(isSeeking); // Create a reference to isSeeking to escape the closure.
-  // Escape the closures to avoid having to rerun this effect on every frame becuase handleSeek is redeclared every frame.
-  // Attempting to useMemo or useCallback simply complicates the issue.
-  // This approach permits attaching the window level callbacks only once.
-  handleSeekRef.current = handleSeek; // Update this reference with the newest decalration of handleSeek.
-  isSeekingRef.current = isSeeking; // Update this reference with the current isSeeking state.
-  useEffect(() => {
-    function handleGlobalMouseUp() {
-      setIsSeeking(false);
-    }
-    function handleGlobalMouseMove(ev: MouseEvent) {
-      if (isSeekingRef.current) handleSeekRef.current(ev.clientX);
-    }
-    window.addEventListener("mouseup", handleGlobalMouseUp);
-    window.addEventListener("mousemove", handleGlobalMouseMove);
-    return () => {
-      window.removeEventListener("mouseup", handleGlobalMouseUp);
-      window.removeEventListener("mousemove", handleGlobalMouseMove);
-    };
-  }, []);
 
   return (
     <div className="w-full overflow-x-scroll pb-8 pt-4">
@@ -110,26 +55,10 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
               />
             </div>
           </div>
-          {/**This is the scrubber thumb. It triggers isSeeking onMouseDown */}
-          <div
-            className="absolute bottom-0 left-0 top-0 h-full w-8 cursor-pointer"
-            draggable={false}
-            style={{
-              translate: `${isSeeking ? clamp(pinkAreaMouseSeekingPos.x, 0, pinkAreaWidth) : isSeekSettled ? thumbProgress : lastSeekPosition}px 0px`,
-            }}
-            onMouseDown={(ev) => {
-              setIsSeeking(true);
-              handleSeek(ev.clientX);
-            }}
-          >
-            <Image
-              src="/scrubber-thumb.svg"
-              alt="scrubber thumb"
-              width={32}
-              height={167}
-              draggable={false}
-            />
-          </div>
+          <ScrubberThumb
+            scrubberWidth={pinkAreaWidth}
+            handleSeek={handleSeek}
+          />
         </div>
         <TimeStampSequence
           videoLength={videoLength}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import useAnimationManager from "~/app/_hooks/useAnimationManager";
-import useListenerGroup, { Listener } from "~/app/_hooks/useListenerGroup";
+import useListenerGroup, { type Listener } from "~/app/_hooks/useListenerGroup";
 import { clamp } from "~/utils/math";
 
 // This entire hook has to handle the case where the video element is not yet mounted and the controls do nothing.
@@ -78,7 +78,7 @@ export function useVideoControls(
       currentVideo.removeEventListener("timeupdate", handleTimeUpdate);
       currentVideo.removeEventListener("waiting", handleWaiting);
     };
-  }, [video]);
+  }, [video, startAnimation, callVideoTimeListeners]);
 
   // Effect to handle rewinding.
   useEffect(() => {

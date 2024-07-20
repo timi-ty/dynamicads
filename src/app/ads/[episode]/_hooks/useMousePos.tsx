@@ -23,19 +23,6 @@ export default function useMouseClientPos(updateWhen = true) {
   return { mouseClientPos };
 }
 
-// Gets the mouse position relative to the top left of this element.
-// Will return 0, 0 if the mouse is positioned exactly at the top left of this element.
-export function useRelativeMousePos(
-  container: HTMLElement | null,
-  updateWhen = true,
-) {
-  const { mouseClientPos } = useMouseClientPos(updateWhen);
-  const relativeMousePos = container
-    ? windowToConatainerPoint(container, mouseClientPos)
-    : { x: 0, y: 0 };
-  return { relativeMousePos };
-}
-
 // Converts a coordinate from the window space to a container space.
 export function windowToConatainerPoint(
   container: HTMLElement,

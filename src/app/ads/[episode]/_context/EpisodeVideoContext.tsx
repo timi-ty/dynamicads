@@ -1,12 +1,18 @@
 "use client";
 
-import { createContext, type ReactNode, useEffect, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   useVideoControls,
   type VideoControls,
 } from "../_hooks/useVideoControls";
 import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
-import { Listener } from "~/app/_hooks/useListenerGroup";
+import type { Listener } from "~/app/_hooks/useListenerGroup";
 
 export interface Episode {
   id: number;
@@ -21,7 +27,7 @@ export interface EpisodeVideoConsumer {
   setVideo: (video: HTMLVideoElement | null) => void;
   controls: VideoControls;
   episode: Episode;
-  scrubberTime: number /* Scrubber time may differ from video time while the seek is settling. 
+  getScrubberTime: () => number /* Scrubber time is updated much more frequently than video time. 
   The video context allows injection and consumption of an arbitrary scrubber time.*/;
   publishScrubberTime: (time: number) => void;
 }
@@ -31,13 +37,13 @@ export function EpisodeVideoContextProvider({
   children,
 }: Readonly<{ episode: Episode; children: ReactNode }>) {
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
-  const [scrubberTime, setScrubberTime] = useState(0);
+  const scrubberTime = useRef(0);
   const videoControls = useVideoControls(video);
   const { invalidateActionStack } = useGlobalActionStack();
 
   useEffect(() => {
     invalidateActionStack(); // Instead of handling different action stacks per episode, start fresh every time a different episode is picked.
-  }, [episode]);
+  }, [episode, invalidateActionStack]);
 
   return (
     <EpisodeVideoContext.Provider
@@ -45,8 +51,8 @@ export function EpisodeVideoContextProvider({
         setVideo: setVideo,
         controls: videoControls,
         episode: episode,
-        scrubberTime: scrubberTime,
-        publishScrubberTime: (time) => setScrubberTime(time),
+        getScrubberTime: () => scrubberTime.current,
+        publishScrubberTime: (time) => (scrubberTime.current = time),
       }}
     >
       {children}
@@ -65,10 +71,10 @@ const defaultConsumer: EpisodeVideoConsumer = {
     togglePlay: function (): void {
       throw new Error("Function not implemented.");
     },
-    plusSeconds: function (_: number): void {
+    plusSeconds: function (_seconds: number): void {
       throw new Error("Function not implemented.");
     },
-    minusSeconds: function (_: number): void {
+    minusSeconds: function (_seconds: number): void {
       throw new Error("Function not implemented.");
     },
     isRewinding: false,
@@ -85,13 +91,13 @@ const defaultConsumer: EpisodeVideoConsumer = {
     jumpToEnd: function (): void {
       throw new Error("Function not implemented.");
     },
-    seek: function (_: number): void {
+    seek: function (_time: number): void {
       throw new Error("Function not implemented.");
     },
     isBuffering: false,
     isReady: false,
     addSmoothTimeUpdateListener: function (
-      onTimeUpdate: (videoTime: number) => void,
+      _onTimeUpdate: (videoTime: number) => void,
     ): Listener {
       throw new Error("Function not implemented.");
     },
@@ -104,8 +110,8 @@ const defaultConsumer: EpisodeVideoConsumer = {
     name: "",
     videoUrl: "",
   },
-  scrubberTime: 0,
-  publishScrubberTime: function (_: number): void {
+  getScrubberTime: () => 0,
+  publishScrubberTime: function (_time: number): void {
     throw new Error("Function not implemented.");
   },
 };
