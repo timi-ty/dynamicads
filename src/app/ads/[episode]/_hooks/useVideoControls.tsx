@@ -40,7 +40,6 @@ export function useVideoControls(
       smoothVideoTime.current = currentVideo.currentTime;
       callVideoTimeListeners();
     }
-
     function handlePlay() {
       setIsPaused(false);
     }
@@ -127,7 +126,7 @@ export function useVideoControls(
     };
   }, [isFastforwarding, video]);
 
-  const controlFunctions = useMemo(() => {
+  const controls = useMemo(() => {
     function togglePlay() {
       if (!video) return;
 
@@ -198,6 +197,13 @@ export function useVideoControls(
     }
 
     return {
+      isPaused,
+      isBuffering,
+      isReady: videoLength > 0,
+      isRewinding,
+      isFastforwarding,
+      videoTime,
+      videoLength,
       togglePlay,
       plusSeconds,
       minusSeconds,
@@ -208,26 +214,20 @@ export function useVideoControls(
       seek,
       addSmoothTimeUpdateListener,
     };
-  }, [video, setIsRewinding, setIsFastforwarding]);
-
-  return {
+  }, [
     isPaused,
     isBuffering,
-    isReady: videoLength > 0,
+    videoLength,
     isRewinding,
     isFastforwarding,
     videoTime,
-    videoLength,
-    togglePlay: controlFunctions.togglePlay,
-    plusSeconds: controlFunctions.plusSeconds,
-    minusSeconds: controlFunctions.minusSeconds,
-    toggleRewind: controlFunctions.toggleRewind,
-    toggleFastforward: controlFunctions.toggleFastforward,
-    jumpToStart: controlFunctions.jumpToStart,
-    jumpToEnd: controlFunctions.jumpToEnd,
-    seek: controlFunctions.seek,
-    addSmoothTimeUpdateListener: controlFunctions.addSmoothTimeUpdateListener,
-  };
+    video,
+    setIsRewinding,
+    setIsFastforwarding,
+    addVideoTimeListener,
+  ]);
+
+  return controls;
 }
 
 export type VideoControls = {
