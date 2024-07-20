@@ -17,6 +17,7 @@ export default function ScrubberThumb({
   const [thumbProgress, setThumbProgress] = useState(0);
 
   useEffect(() => {
+    console.log("adding smooth list");
     const smoothTimeUpdateListener = addSmoothTimeUpdateListener(
       (smoothVideoTime) => {
         const clampedVideoTime = clamp(smoothVideoTime, 0, videoLength);

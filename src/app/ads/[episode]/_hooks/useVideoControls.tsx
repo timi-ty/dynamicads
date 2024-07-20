@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useAnimationManager from "~/app/_hooks/useAnimationManager";
 import useListenerGroup, { type Listener } from "~/app/_hooks/useListenerGroup";
 import { clamp } from "~/utils/math";
@@ -17,7 +17,7 @@ export function useVideoControls(
   const smoothVideoTime = useRef(0);
   const { startAnimation } = useAnimationManager();
   const {
-    addListener: addListenerVideoTime,
+    addListener: addVideoTimeListener,
     callListeners: callVideoTimeListeners,
   } = useListenerGroup();
 
@@ -127,92 +127,106 @@ export function useVideoControls(
     };
   }, [isFastforwarding, video]);
 
-  function togglePlay() {
-    if (!video) return;
+  const controlFunctions = useMemo(() => {
+    function togglePlay() {
+      if (!video) return;
 
-    if (video.paused || video.ended) {
-      setIsRewinding(false); // Every time video plays or pauses, cancel seeking.
-      setIsFastforwarding(false);
-      void video.play();
-    } else {
-      setIsFastforwarding(false); // Every time video plays or pauses, cancel seeking.
-      setIsFastforwarding(false);
-      video.pause();
+      if (video.paused || video.ended) {
+        setIsRewinding(false); // Every time video plays or pauses, cancel seeking.
+        setIsFastforwarding(false);
+        void video.play();
+      } else {
+        setIsFastforwarding(false); // Every time video plays or pauses, cancel seeking.
+        setIsFastforwarding(false);
+        video.pause();
+      }
     }
-  }
 
-  function plusSeconds(s: number) {
-    if (!video) return;
+    function plusSeconds(s: number) {
+      if (!video) return;
 
-    video.currentTime += s;
-  }
+      video.currentTime += s;
+    }
 
-  function minusSeconds(s: number) {
-    if (!video) return;
+    function minusSeconds(s: number) {
+      if (!video) return;
 
-    video.currentTime -= s;
-  }
+      video.currentTime -= s;
+    }
 
-  function toggleRewind() {
-    if (!video) return;
+    function toggleRewind() {
+      if (!video) return;
 
-    setIsRewinding((r) => !r);
-  }
+      setIsRewinding((r) => !r);
+    }
 
-  function toggleFastforward() {
-    if (!video) return;
+    function toggleFastforward() {
+      if (!video) return;
 
-    setIsFastforwarding((f) => !f);
-  }
+      setIsFastforwarding((f) => !f);
+    }
 
-  function jumpToStart() {
-    if (!video) return;
+    function jumpToStart() {
+      if (!video) return;
 
-    video.pause();
-    video.currentTime = 0;
-  }
+      video.pause();
+      video.currentTime = 0;
+    }
 
-  function jumpToEnd() {
-    if (!video) return;
+    function jumpToEnd() {
+      if (!video) return;
 
-    video.pause();
-    video.currentTime = video.duration;
-  }
+      video.pause();
+      video.currentTime = video.duration;
+    }
 
-  function seek(time: number) {
-    if (!video) return;
+    function seek(time: number) {
+      if (!video) return;
 
-    const seekTime = clamp(time, 0, video.duration);
+      const seekTime = clamp(time, 0, video.duration);
 
-    video.pause();
-    video.currentTime = seekTime;
-  }
+      video.pause();
+      video.currentTime = seekTime;
+    }
 
-  // Components that set state in their smooth time update listener will rerender a lot - at the screen refresh rate.
-  // Doing animations through react rerenders is not the best for performance, but results in cleaner code.
-  function addSmoothTimeUpdateListener(
-    onTimeUpdate: (videoTime: number) => void,
-  ) {
-    return addListenerVideoTime(() => onTimeUpdate(video?.currentTime ?? 0));
-  }
+    // Components that set state in their smooth time update listener will rerender a lot - at the screen refresh rate.
+    // Doing animations through react rerenders is not the best for performance, but results in cleaner code.
+    function addSmoothTimeUpdateListener(
+      onTimeUpdate: (videoTime: number) => void,
+    ) {
+      return addVideoTimeListener(() => onTimeUpdate(video?.currentTime ?? 0));
+    }
+
+    return {
+      togglePlay,
+      plusSeconds,
+      minusSeconds,
+      toggleRewind,
+      toggleFastforward,
+      jumpToStart,
+      jumpToEnd,
+      seek,
+      addSmoothTimeUpdateListener,
+    };
+  }, [video, setIsRewinding, setIsFastforwarding]);
 
   return {
     isPaused,
     isBuffering,
     isReady: videoLength > 0,
-    videoTime,
-    videoLength,
-    togglePlay,
-    plusSeconds,
-    minusSeconds,
     isRewinding,
     isFastforwarding,
-    toggleRewind,
-    toggleFastforward,
-    jumpToStart,
-    jumpToEnd,
-    seek,
-    addSmoothTimeUpdateListener,
+    videoTime,
+    videoLength,
+    togglePlay: controlFunctions.togglePlay,
+    plusSeconds: controlFunctions.plusSeconds,
+    minusSeconds: controlFunctions.minusSeconds,
+    toggleRewind: controlFunctions.toggleRewind,
+    toggleFastforward: controlFunctions.toggleFastforward,
+    jumpToStart: controlFunctions.jumpToStart,
+    jumpToEnd: controlFunctions.jumpToEnd,
+    seek: controlFunctions.seek,
+    addSmoothTimeUpdateListener: controlFunctions.addSmoothTimeUpdateListener,
   };
 }
 
@@ -220,13 +234,13 @@ export type VideoControls = {
   isPaused: boolean;
   isBuffering: boolean;
   isReady: boolean;
+  isRewinding: boolean;
+  isFastforwarding: boolean;
   videoTime: number;
   videoLength: number;
   togglePlay: () => void;
   plusSeconds: (seconds: number) => void;
   minusSeconds: (seconds: number) => void;
-  isRewinding: boolean;
-  isFastforwarding: boolean;
   toggleRewind: () => void;
   toggleFastforward: () => void;
   jumpToStart: () => void;

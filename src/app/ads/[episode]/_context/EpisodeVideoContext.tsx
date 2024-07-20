@@ -3,6 +3,7 @@
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -41,6 +42,11 @@ export function EpisodeVideoContextProvider({
   const videoControls = useVideoControls(video);
   const { invalidateActionStack } = useGlobalActionStack();
 
+  const publishScrubberTime = useCallback(
+    (time: number) => (scrubberTime.current = time),
+    [],
+  );
+
   useEffect(() => {
     invalidateActionStack(); // Instead of handling different action stacks per episode, start fresh every time a different episode is picked.
   }, [episode, invalidateActionStack]);
@@ -52,7 +58,7 @@ export function EpisodeVideoContextProvider({
         controls: videoControls,
         episode: episode,
         getScrubberTime: () => scrubberTime.current,
-        publishScrubberTime: (time) => (scrubberTime.current = time),
+        publishScrubberTime: publishScrubberTime,
       }}
     >
       {children}
