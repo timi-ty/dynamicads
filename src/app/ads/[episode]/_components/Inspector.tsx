@@ -51,7 +51,7 @@ function Controls({
     <div className="flex flex-col-reverse items-center justify-between gap-4 text-zinc-500 md:flex-row">
       <div className="flex flex-row items-center gap-12 text-sm">
         <button
-          className={`group flex flex-row items-center gap-3 ${canUndo ? "" : "opacity-60"}`}
+          className={`group flex flex-row items-center gap-3 ${canUndo ? "" : "opacity-30"}`}
           type="button"
           disabled={!canUndo}
           onClick={undoAction}
@@ -68,7 +68,7 @@ function Controls({
           </span>
         </button>
         <button
-          className={`group flex flex-row items-center gap-3 ${canRedo ? "" : "opacity-60"}`}
+          className={`group flex flex-row items-center gap-3 ${canRedo ? "" : "opacity-30"}`}
           type="button"
           disabled={!canRedo}
           onClick={redoAction}

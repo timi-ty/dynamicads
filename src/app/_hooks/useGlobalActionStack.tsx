@@ -69,25 +69,29 @@ export default function useGlobalActionStack() {
   async function undoAction() {
     const action = undoActionStack.pop() as Action;
     if (action) {
-      // Undoing an action means it may require a different input to be redone. Get this new required input and reconstruct the forward action.
-      const undoActionResult = await action.reverseAction();
-      // If the undo action returns null, it means the action could not revert the application state back to exactly where it was before.
-      // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
-      if (undoActionResult === null) {
-        invalidateActionStack();
-        return null;
+      try {
+        // Undoing an action means it may require a different input to be redone. Get this new required input and reconstruct the forward action.
+        const undoActionResult = await action.reverseAction();
+        // If the undo action returns null, it means the action could not revert the application state back to exactly where it was before.
+        // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
+        if (undoActionResult === null) {
+          invalidateActionStack();
+          return null;
+        }
+        const reconstructedAction = {
+          ...action,
+          forwardAction: async () => {
+            try {
+              return await action.primary(undoActionResult);
+            } catch {
+              return null; // Break and invalidate.
+            }
+          },
+        };
+        setRedoActionStack((s) => [...s, reconstructedAction]);
+      } catch {
+        return null; // Break and invalidate.
       }
-      const reconstructedAction = {
-        ...action,
-        forwardAction: async () => {
-          try {
-            return await action.primary(undoActionResult);
-          } catch {
-            return null; // Break and invalidate.
-          }
-        },
-      };
-      setRedoActionStack((s) => [...s, reconstructedAction]);
     }
   }
 
@@ -95,25 +99,29 @@ export default function useGlobalActionStack() {
   async function redoAction() {
     const action = redoActionStack.pop() as Action;
     if (action) {
-      // Redoing the action means it may return a different result this time. Get this new result and reconstruct the reverse action.
-      const redoActionResult = await action.forwardAction();
-      // If the redo action returns null, it means the action could not revert the application state back to exactly where it was before.
-      // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
-      if (redoActionResult === null) {
-        invalidateActionStack();
-        return null;
+      try {
+        // Redoing the action means it may return a different result this time. Get this new result and reconstruct the reverse action.
+        const redoActionResult = await action.forwardAction();
+        // If the redo action returns null, it means the action could not revert the application state back to exactly where it was before.
+        // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
+        if (redoActionResult === null) {
+          invalidateActionStack();
+          return null;
+        }
+        const reconstructedAction = {
+          ...action,
+          reverseAction: async () => {
+            try {
+              return await action.revert(redoActionResult);
+            } catch {
+              return null; // Break and invalidate.
+            }
+          },
+        };
+        setUndoActionStack((s) => [...s, reconstructedAction]);
+      } catch {
+        return null; // Break and invalidate.
       }
-      const reconstructedAction = {
-        ...action,
-        reverseAction: async () => {
-          try {
-            return await action.revert(redoActionResult);
-          } catch {
-            return null; // Break and invalidate.
-          }
-        },
-      };
-      setUndoActionStack((s) => [...s, reconstructedAction]);
     }
   }
 

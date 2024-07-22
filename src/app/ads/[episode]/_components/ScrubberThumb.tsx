@@ -70,7 +70,7 @@ export default function ScrubberThumb({
 
   return (
     <div
-      className="absolute bottom-0 left-0 top-0 h-full w-8 cursor-pointer"
+      className="absolute bottom-0 left-0 top-0 h-full w-16 cursor-pointer"
       draggable={false}
       style={{
         translate: `${thumbProgress}px 0px`,
@@ -89,7 +89,7 @@ export default function ScrubberThumb({
       <Image
         src="/scrubber-thumb.svg"
         alt="scrubber thumb"
-        width={32}
+        width={64}
         height={167}
         draggable={false}
       />

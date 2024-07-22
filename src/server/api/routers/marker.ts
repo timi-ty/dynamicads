@@ -1,3 +1,4 @@
+import { time } from "console";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -42,6 +43,7 @@ export const markerRouter = createTRPCRouter({
           .refine((val) => validMarkerTypes.includes(val as AdMarkerType), {
             message: "Type must be one of: 'Auto', 'A/B', 'Static'",
           }),
+        value: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -50,6 +52,7 @@ export const markerRouter = createTRPCRouter({
           where: { id: input.markerId, createdById: ctx.session.user.id },
           data: {
             type: input.type,
+            value: input.value,
           },
         });
         return { updatedMarker: updatedMarker };

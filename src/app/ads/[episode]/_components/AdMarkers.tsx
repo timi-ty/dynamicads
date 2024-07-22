@@ -46,6 +46,7 @@ function AdMarkersCard() {
               index={i + 1}
               type={marker.type as AdMarkerType}
               value={marker.value}
+              isEditable={controls.isReady}
             />
           ))}
         </div>
