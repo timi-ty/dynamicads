@@ -60,14 +60,13 @@ export default function AdMarkerHandle({
       async function revert(params?: { oldMarkerValue: number }) {
         if (!params) return;
 
-        await editMarker.mutateAsync(
-          { type: type, value: params.oldMarkerValue, markerId: id },
-          {
-            onSuccess: () => {
-              void queryUtils.marker.getAll.invalidate();
-            },
-          },
-        );
+        const { updatedMarker } = await editMarker.mutateAsync({
+          type: type,
+          value: params.oldMarkerValue,
+          markerId: id,
+        });
+        if (editMarker.error ?? !updatedMarker) return null; // Undo failed.
+        void queryUtils.marker.getAll.invalidate();
       }
       void doAction(primary, revert);
     },

@@ -37,6 +37,7 @@ export default function CreateAdMarkerButtons({
         });
         if (recoverMarker.error ?? !recoveredMarker) return null; // Nothing to undo.
         void queryUtils.marker.getAll.invalidate();
+
         return { markerId: recoveredMarker.id };
       }
 
@@ -59,15 +60,11 @@ export default function CreateAdMarkerButtons({
     async function revert(params?: { markerId: number }) {
       if (!params) return; // Did not get the needed parameters, can't revert.
 
-      const { deletedMarker } = await deleteMarker.mutateAsync(
-        { markerId: params.markerId },
-        {
-          onSettled: () => {
-            void queryUtils.marker.getAll.invalidate();
-          },
-        },
-      );
+      const { deletedMarker } = await deleteMarker.mutateAsync({
+        markerId: params.markerId,
+      });
       if (deleteMarker.error ?? !deletedMarker) return null; // Nothing to redo.
+      void queryUtils.marker.getAll.invalidate();
 
       return { deletedMarkerId: deletedMarker.id };
     }

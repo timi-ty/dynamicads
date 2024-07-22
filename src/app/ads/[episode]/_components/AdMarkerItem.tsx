@@ -98,15 +98,13 @@ function BaseAdMarkerItem({
     async function revert(params?: { oldType: AdMarkerType }) {
       if (!params) return;
 
-      await editMarker.mutateAsync(
-        { type: params.oldType, value: value, markerId: id },
-        {
-          onSuccess: () => {
-            setStatus("Done");
-            void queryUtils.marker.getAll.invalidate();
-          },
-        },
-      );
+      const { updatedMarker } = await editMarker.mutateAsync({
+        type: params.oldType,
+        value: value,
+        markerId: id,
+      });
+      if (editMarker.error ?? !updatedMarker) return null; // Undo failed.
+      void queryUtils.marker.getAll.invalidate();
     }
     void doAction(primary, revert);
   }
@@ -128,12 +126,12 @@ function BaseAdMarkerItem({
       };
     }
     async function revert(params?: { deletedMarkerId: number }) {
-      if (!params) return null;
+      if (!params) return null; // Undo failed.
 
       const { recoveredMarker } = await recoverMarker.mutateAsync({
         markerId: params.deletedMarkerId,
       });
-      if (recoverMarker.error ?? !recoveredMarker) return null; // Nothing to redo.
+      if (recoverMarker.error ?? !recoveredMarker) return null; // Undo failed.
       void queryUtils.marker.getAll.invalidate();
     }
     void doAction(primary, revert);
