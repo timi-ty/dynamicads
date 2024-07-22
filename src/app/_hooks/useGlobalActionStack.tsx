@@ -29,41 +29,44 @@ export default function useGlobalActionStack() {
   // If the primary action returns null, the action is not pushed to the stack and cannot be undone, this should be the case if the primary action failed.
   // If the revert action returns null, the action could not be reversed and hence the redo stack must be invalidated to preserve the correctness of the undo stack.
   // It works by exchanging action sets between the undo and redo stack based on who acted last.
-  async function doAction<T, K>(
-    primary: (revertActionParams?: NonNullable<K>) => T | Promise<T>,
-    revert: (primaryActionParams?: NonNullable<T>) => K | Promise<K>,
-  ) {
-    // Do the primary action and await the result if necessary.
+  const doAction = useCallback(
+    async <T, K>(
+      primary: (revertActionParams?: NonNullable<K>) => T | Promise<T>,
+      revert: (primaryActionParams?: NonNullable<T>) => K | Promise<K>,
+    ) => {
+      // Do the primary action and await the result if necessary.
 
-    try {
-      const actionResult = await primary();
+      try {
+        const actionResult = await primary();
 
-      // If the primary action returns null, it does not push to the stack and will not be reversible. It has no effect on the stack.
-      if (actionResult === null) {
+        // If the primary action returns null, it does not push to the stack and will not be reversible. It has no effect on the stack.
+        if (actionResult === null) {
+          return null;
+        }
+
+        // Construct the forward and reverse actions.
+        async function forwardAction() {
+          return primary();
+        }
+        async function reverseAction() {
+          return revert(actionResult ?? undefined);
+        }
+
+        // Push to the undo stack. Also push the unboxed versions of revert and primary so that we can reconstruct them when ping-ponging through the actions.
+        setUndoActionStack((s) => [
+          ...s,
+          { forwardAction, reverseAction, primary, revert },
+        ]);
+
+        // Clear the redo stack every time a new organic action is done.
+        // Being able to redo an old action is counter-inuitive and erroneous if the actions can depend on each other.
+        setRedoActionStack([]);
+      } catch {
         return null;
       }
-
-      // Construct the forward and reverse actions.
-      async function forwardAction() {
-        return primary();
-      }
-      async function reverseAction() {
-        return revert(actionResult ?? undefined);
-      }
-
-      // Push to the undo stack. Also push the unboxed versions of revert and primary so that we can reconstruct them when ping-ponging through the actions.
-      setUndoActionStack((s) => [
-        ...s,
-        { forwardAction, reverseAction, primary, revert },
-      ]);
-
-      // Clear the redo stack every time a new organic action is done.
-      // Being able to redo an old action is counter-inuitive and erroneous if the actions can depend on each other.
-      setRedoActionStack([]);
-    } catch {
-      return null;
-    }
-  }
+    },
+    [setRedoActionStack],
+  );
 
   // Pops an action from the undo stack, calls the reverse for it, and pushes the action to the redo stack.
   async function undoAction() {

@@ -218,11 +218,11 @@ function EditAdMarkerTimeItem({
   finishEditing: () => void;
 }>) {
   const inputRef = useRef<HTMLInputElement>(null);
+
   const [markerTime, setMarkerTime] = useState(millisecondsToHHMMSS(value));
+  const [status, setStatus] = useState<ConfigureAdMarkerStatus>("Done");
 
   const queryUtils = api.useUtils();
-
-  const [status, setStatus] = useState<ConfigureAdMarkerStatus>("Done");
   const editMarker = api.marker.update.useMutation();
 
   const { doAction } = useGlobalActionStack();

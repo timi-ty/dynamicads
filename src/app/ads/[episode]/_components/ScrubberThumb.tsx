@@ -37,7 +37,10 @@ export default function ScrubberThumb({
     videoLength,
   ]);
 
+  // This effect attached window level listeners that take over once a seek begins.
   useEffect(() => {
+    if (!isSeeking) return; // Listeners are not needed if not seeking.
+
     function handleGlobalMouchUp() {
       setIsSeeking(false);
     }
@@ -54,13 +57,10 @@ export default function ScrubberThumb({
 
       if (isSeeking) handleSeek(clientX);
     }
-    const mouchUpListener = addWindowMouchUpListener(
-      handleGlobalMouchUp,
-      isSeeking,
-    );
+    const mouchUpListener = addWindowMouchUpListener(handleGlobalMouchUp, true);
     const mouchMoveListener = addWindowMouchMoveListener(
       handleGlobalMouchMove,
-      isSeeking,
+      true,
     );
     return () => {
       mouchUpListener.remove();
@@ -70,7 +70,7 @@ export default function ScrubberThumb({
 
   return (
     <div
-      className="absolute bottom-0 left-0 top-0 h-full w-16 cursor-pointer"
+      className="absolute bottom-0 left-0 top-0 h-full w-8 cursor-pointer select-none"
       draggable={false}
       style={{
         translate: `${thumbProgress}px 0px`,
@@ -89,7 +89,7 @@ export default function ScrubberThumb({
       <Image
         src="/scrubber-thumb.svg"
         alt="scrubber thumb"
-        width={64}
+        width={32}
         height={167}
         draggable={false}
       />
