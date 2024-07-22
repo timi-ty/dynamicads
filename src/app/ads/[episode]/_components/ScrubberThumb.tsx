@@ -56,7 +56,7 @@ export default function ScrubberThumb({
       let clientX = 0;
       if (mouseEvent) {
         clientX = mouseEvent.clientX;
-      } else if (touchEvent && touchEvent.touches[0]) {
+      } else if (touchEvent?.touches[0]) {
         clientX = touchEvent.touches[0].clientX;
       }
 

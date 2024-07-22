@@ -89,7 +89,7 @@ export function useVideoControls(
     }
     const rewindAnimation = startAnimation(updateRewind);
     return () => rewindAnimation.stop();
-  }, [isRewinding, video]);
+  }, [isRewinding, video, startAnimation]);
 
   // Effect to handle fastforwarding.
   useEffect(() => {
@@ -102,7 +102,7 @@ export function useVideoControls(
     }
     const fastforwardAnimation = startAnimation(updateFastforward);
     return () => fastforwardAnimation.stop();
-  }, [isFastforwarding, video]);
+  }, [isFastforwarding, video, startAnimation]);
 
   const controls = useMemo(() => {
     function togglePlay() {
