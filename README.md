@@ -24,97 +24,38 @@ However, there were a few challenges that were solved by coloring outside the li
 
 4. **Automatic redirects:** This page uses automatic redirects to steer users to the implemented page at "/ads/[episode]". Other pages are stubs.
 
-5. **Scrubber.tsx:** This is the most complex component in this application. It tightly mananges video scrubbing while also indicating video play time. This means it is both a consumer and a publisher of the video time. This requirement forced some custom logic, most notably:
+5. **Custom video controls:** This project tightly mananges video scrubbing while also indicating video play time. This means it both consumes and sets the current time of a video element. This requirement forced some custom logic, most notably the use of requestAnimationFrame to poll for the video time.
 
-   - Wrapping values in refs to escape closures and to listen/react to window level mouse events without having to remove and re-attach the listeners on component updates.
-
-   ```javascript
-   // This effect ensures that if mouse down was triggered by the scrubber, any mouse events anywhere are handled by the scrubber.
-   const handleSeekRef = useRef(handleSeek); // Create a reference to handleSeek to escape the closure.
-   const isSeekingRef = useRef(isSeeking); // Create a reference to isSeeking to escape the closure.
-   // Escape the closures to avoid having to rerun this effect on every frame becuase handleSeek is redeclared every frame.
-   // Attempting to useMemo or useCallback simply complicates the issue.
-   // This approach permits attaching the window level callbacks only once.
-   handleSeekRef.current = handleSeek; // Update this reference with the newest decalration of handleSeek.
-   isSeekingRef.current = isSeeking; // Update this reference with the current isSeeking state.
-   useEffect(() => {
-    function handleGlobalMouseUp() {
-      setIsSeeking(false);
-    }
-    function handleGlobalMouseMove(ev: MouseEvent) {
-      if (isSeekingRef.current) handleSeekRef.current(ev.clientX);
-    }
-    window.addEventListener("mouseup", handleGlobalMouseUp);
-    window.addEventListener("mousemove", handleGlobalMouseMove);
-    return () => {
-      window.removeEventListener("mouseup", handleGlobalMouseUp);
-      window.removeEventListener("mousemove", handleGlobalMouseMove);
-    };
-   }, []);
-   ```
-
-   - Injecting scrubber time value updates and a video reference into an existing react context tree from within the tree itself. This is not done within the Scrubber.tsx component but is done because of it.
-
-   ```javascript
-   function EpisodeVideoContextProvider({
-   episode,
-   children,
-   }: Readonly<{ episode: Episode; children: ReactNode }>) {
-   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
-   const [scrubberTime, setScrubberTime] = useState(0);
-   const videoControls = useVideoControls(video);
-   return (
-    <EpisodeVideoContext.Provider
-      value={{
-        setVideo: setVideo,
-        controls: videoControls,
-        episode: episode,
-        scrubberTime: scrubberTime,
-        publishScrubberTime: (time) => setScrubberTime(time),
-      }}
-    >
-      {children}
-    </EpisodeVideoContext.Provider>
-   );
-   }
-   ```
-
-   - Using an effect without specifying all its dependencies in the dependency array.
-
-   ```javascript
-   // When we get an updated video time, it means the seek is settled.
-   useEffect(() => {
-     publishScrubberTime(videoTime); // Keep the scrubber time in sync with the video time.
-     setIsSeekSettled(true);
-   }, [videoTime]); // This effect should only fire stricly when the videoTime updates. The functions used inside do not change between renders.
-   ```
-
-6. **Custom undo/redo stack:** Done for pleasure only, this app uses a custom built undo/redo stack. Jotai is used to manage a global stack state. Some type gymnastics were required to beat eslint rules. The stack also invalidates itself more often than one might expect. This is done becuase the delete operation which is not really reversible is treated like a reversible action by simply creating another row in the db with the same values as the deleted data. This new row will have a new/different id though, meaning the stack history can no longer be trusted. Proper undo/redo should guarantee that undo always resets application state to EXACTLY where it was before.
+6. **Custom undo/redo stack:** This app uses a custom built undo/redo stack. Jotai is used to manage a global stack state. Some type gymnastics were required to beat eslint rules.
 
 ```javascript
   // Pops an action from the undo stack, calls the reverse for it, and pushes the action to the redo stack.
   async function undoAction() {
     const action = undoActionStack.pop() as Action;
     if (action) {
-      // Undoing an action means it may require a different input to be redone. Get this new required input and reconstruct the forward action.
-      const undoActionResult = await action.reverseAction();
-      // If the undo action returns null, it means the action could not revert the application state back to exactly where it was before.
-      // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
-      if (undoActionResult === null) {
-        invalidateActionStack();
-        return null;
+      try {
+        // Undoing an action means it may require a different input to be redone. Get this new required input and reconstruct the forward action.
+        const undoActionResult = await action.reverseAction();
+        // If the undo action returns null, it means the action could not revert the application state back to exactly where it was before.
+        // If this happens, our entire stack is now potentially corrupt and cannot be trusted. Invalidate the whole thing.
+        if (undoActionResult === null) {
+          invalidateActionStack();
+          return null;
+        }
+        const reconstructedAction = {
+          ...action,
+          forwardAction: async () => {
+            try {
+              return await action.primary(undoActionResult);
+            } catch {
+              return null; // Break and invalidate.
+            }
+          },
+        };
+        setRedoActionStack((s) => [...s, reconstructedAction]);
+      } catch {
+        return null; // Break and invalidate.
       }
-      const reconstructedAction = {
-        ...action,
-        forwardAction: async () => {
-          try {
-            return await action.primary(undoActionResult);
-          } catch {
-            return null; // Break and invalidate.
-          }
-        },
-      };
-      setRedoActionStack((s) => [...s, reconstructedAction]);
     }
   }
 ```
