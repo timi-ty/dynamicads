@@ -51,8 +51,8 @@ function Controls({
   useEffect(() => {
     // This listener can fire as often as the screen refresh rate. A conditional state update is used to reduce the rate at which this component updates.
     const listener = videoContext.controls.addSmoothTimeUpdateListener(() => {
-      if (Math.abs(time - videoContext.controls.getVideoTime()) >= 1.0)
-        setTime(videoContext.controls.getVideoTime()); // If the displaying time is more than 1s out of sync with the actual video time, update it.
+      if (Math.abs(time - Math.floor(videoContext.controls.getVideoTime())) > 0)
+        setTime(Math.floor(videoContext.controls.getVideoTime())); // If the displaying time is more than 1s out of sync with the actual video time, update it.
     });
     return () => listener.remove();
   }, [videoContext, setTime, time]);

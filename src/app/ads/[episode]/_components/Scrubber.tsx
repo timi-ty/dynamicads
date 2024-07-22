@@ -69,7 +69,6 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
         <TimeStampSequence
           videoLength={videoControls.videoLength}
           scrubberWidth={pinkAreaWidth}
-          zoom={zoom}
         />
       </div>
     </div>
@@ -79,17 +78,24 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
 function TimeStampSequence({
   videoLength,
   scrubberWidth,
-  zoom,
-}: Readonly<{ videoLength: number; scrubberWidth: number; zoom: number }>) {
-  const timeStamps = Array.from({ length: Math.ceil(zoom * 10) }, (_, i) => i); // 10 timeStamps for the default zoom of 1.
+}: Readonly<{ videoLength: number; scrubberWidth: number }>) {
+  const baseTimeStampWidth = 128.0; // px
+  const baseGraduation = videoLength * (baseTimeStampWidth / scrubberWidth);
+  let graduation = Math.ceil(baseGraduation); // Minimum of 1s graduation.
+
+  const timeStampWidth = Math.ceil(
+    (baseTimeStampWidth * graduation) / baseGraduation,
+  );
+
+  const timeStamps = Array.from(
+    { length: Math.ceil(videoLength / graduation) },
+    (_, i) => i,
+  );
+
   return (
-    <div className="flex w-full flex-row overflow-x-hidden pe-2 ps-2">
+    <div className="flex w-full flex-row overflow-x-hidden pe-4 ps-4">
       {timeStamps.map((i) => (
-        <TimeStamp
-          key={i}
-          width={scrubberWidth / timeStamps.length}
-          seconds={((i + 1) * videoLength) / timeStamps.length}
-        />
+        <TimeStamp key={i} width={timeStampWidth} seconds={i * graduation} />
       ))}
     </div>
   );
@@ -100,24 +106,25 @@ function TimeStamp({
   width,
   seconds,
 }: Readonly<{ width: number; seconds: number }>) {
-  const arrayOfTen = Array.from({ length: 10 }, (_, i) => i);
+  const arrayOfEleven = Array.from({ length: 11 }, (_, i) => i);
+
   return (
     <div
-      className="relative flex h-[54px] flex-row justify-between"
+      className="relative flex h-[54px] flex-shrink-0 flex-row justify-between"
       style={{ width: `${width}px` }}
     >
       <div
-        className={`absolute flex h-full w-full flex-row items-center justify-center ${width > 80 ? "text-sm" : "text-xs"} font-semibold text-zinc-500`}
+        className={`absolute flex h-full w-full flex-row items-center justify-center font-semibold text-zinc-500`}
       >
         <div>{millisecondsToHHMMSS(seconds * 1000)}</div>
       </div>
-      {arrayOfTen.map((i) => (
+      {arrayOfEleven.map((i) => (
         <div
           key={i}
           className="border-l bg-zinc-300"
           style={{
             height: `${i === 0 ? "100%" : "8px"}`,
-            opacity: `${i === 9 ? "0" : ""}`,
+            opacity: `${i === 10 ? "0" : ""}`,
           }}
         ></div>
       ))}
