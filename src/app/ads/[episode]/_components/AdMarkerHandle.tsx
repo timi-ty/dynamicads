@@ -133,7 +133,7 @@ export default function AdMarkerHandle({
   return (
     <div
       style={{ left: `${markerLeft}px` }}
-      className={`pointer-events-auto absolute flex h-full w-[42px] cursor-pointer select-none flex-col items-center justify-between rounded-md border-2 border-zinc-900 pb-2 pt-2 ${type === "Static" ? "bg-blue-300 stroke-blue-800 text-blue-800" : type === "A/B" ? "bg-orange-300 stroke-orange-800 text-orange-800" : "bg-green-300 stroke-green-800 text-green-800"}`}
+      className={`pointer-events-auto absolute flex h-full w-[42px] cursor-pointer touch-none select-none flex-col items-center justify-between rounded-md border-2 border-zinc-900 pb-2 pt-2 ${type === "Static" ? "bg-blue-300 stroke-blue-800 text-blue-800" : type === "A/B" ? "bg-orange-300 stroke-orange-800 text-orange-800" : "bg-green-300 stroke-green-800 text-green-800"}`}
       onMouseDown={(ev) => {
         setIsAdjusting(true);
         handleAdjust(ev.clientX);

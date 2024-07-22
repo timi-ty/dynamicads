@@ -68,7 +68,7 @@ export default function ScrubberThumb({
 
   return (
     <div
-      className="absolute bottom-0 left-0 top-0 h-full w-8 cursor-pointer select-none"
+      className="absolute bottom-0 left-0 top-0 h-full w-8 cursor-pointer touch-none select-none"
       draggable={false}
       style={{
         translate: `${thumbProgress}px 0px`,
