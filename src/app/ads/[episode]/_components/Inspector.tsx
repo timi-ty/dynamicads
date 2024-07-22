@@ -2,7 +2,7 @@
 
 import { millisecondsToHHMMSS } from "~/utils/format";
 import Image from "next/image";
-import { type ChangeEvent, useContext, useState } from "react";
+import { type ChangeEvent, useContext, useEffect, useState } from "react";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import Scrubber, { ScrubberLoader } from "./Scrubber";
 import useGlobalActionStack from "~/app/_hooks/useGlobalActionStack";
@@ -46,6 +46,16 @@ function Controls({
 }>) {
   const videoContext = useContext(EpisodeVideoContext);
   const { canUndo, canRedo, undoAction, redoAction } = useGlobalActionStack();
+  const [time, setTime] = useState(videoContext.controls.getVideoTime()); // video time in seconds.
+
+  useEffect(() => {
+    // This listener can fire as often as the screen refresh rate. A conditional state update is used to reduce the rate at which this component updates.
+    const listener = videoContext.controls.addSmoothTimeUpdateListener(() => {
+      if (Math.abs(time - videoContext.controls.getVideoTime()) >= 1.0)
+        setTime(videoContext.controls.getVideoTime()); // If the displaying time is more than 1s out of sync with the actual video time, update it.
+    });
+    return () => listener.remove();
+  }, [videoContext, setTime, time]);
 
   return (
     <div className="flex flex-col-reverse items-center justify-between gap-4 text-zinc-500 md:flex-row">
@@ -86,7 +96,7 @@ function Controls({
         </button>
       </div>
       <span className="rounded-md border p-3 pb-2 pt-2">
-        {millisecondsToHHMMSS(videoContext.controls.getVideoTime() * 1000)}
+        {millisecondsToHHMMSS(time * 1000)}
       </span>
       <ZoomSlider
         zoomIndex={zoomIndex}
