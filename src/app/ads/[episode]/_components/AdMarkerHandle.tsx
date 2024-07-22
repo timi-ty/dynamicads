@@ -8,7 +8,7 @@ import {
   addWindowMouchMoveListener,
 } from "~/utils/events";
 import { clamp } from "~/utils/math";
-import { AdMarkerType } from "~/utils/types";
+import { type AdMarkerType } from "~/utils/types";
 
 export default function AdMarkerHandle({
   id,
@@ -70,14 +70,25 @@ export default function AdMarkerHandle({
       }
       void doAction(primary, revert);
     },
-    [editMarker, doAction],
+    [
+      editMarker,
+      doAction,
+      id,
+      queryUtils.marker.getAll,
+      type,
+      value,
+      videoLength,
+    ],
   );
 
-  const handleAdjust = useCallback((clientMousePosX: number) => {
-    const relativeMousePos = getRelativePos(clientMousePosX - 21); // The marker handle is hardcoded to a 42px width. Subtracting 21 makes the drag centered on the marker.
-    const clampedAdjustPos = clamp(relativeMousePos.x, 0, scrubberWidth);
-    setMarkerLeft(clampedAdjustPos);
-  }, []);
+  const handleAdjust = useCallback(
+    (clientMousePosX: number) => {
+      const relativeMousePos = getRelativePos(clientMousePosX - 21); // The marker handle is hardcoded to a 42px width. Subtracting 21 makes the drag centered on the marker.
+      const clampedAdjustPos = clamp(relativeMousePos.x, 0, scrubberWidth);
+      setMarkerLeft(clampedAdjustPos);
+    },
+    [getRelativePos, scrubberWidth],
+  );
 
   // This effect attached window level listeners that take over once an adjust begins.
   useEffect(() => {
@@ -110,7 +121,14 @@ export default function AdMarkerHandle({
       mouchUpListener.remove();
       mouchMoveListener.remove();
     };
-  }, [isAdjusting, handleAdjust, handleEditValue]);
+  }, [
+    isAdjusting,
+    handleAdjust,
+    handleEditValue,
+    markerLeft,
+    scrubberWidth,
+    videoLength,
+  ]);
 
   return (
     <div

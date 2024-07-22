@@ -65,7 +65,7 @@ export default function useGlobalActionStack() {
         return null;
       }
     },
-    [setRedoActionStack],
+    [setRedoActionStack, setUndoActionStack],
   );
 
   // Pops an action from the undo stack, calls the reverse for it, and pushes the action to the redo stack.

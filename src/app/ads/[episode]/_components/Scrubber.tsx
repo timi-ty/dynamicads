@@ -5,7 +5,7 @@ import Image from "next/image";
 import { millisecondsToHHMMSS } from "~/utils/format";
 import { api } from "~/trpc/react";
 import ScrubberThumb from "./ScrubberThumb";
-import { AdMarkerType } from "~/utils/types";
+import { type AdMarkerType } from "~/utils/types";
 import AdMarkerHandle from "./AdMarkerHandle";
 
 const defaultPickAreaWidth = 1134; //cherry picked px value.
@@ -34,7 +34,7 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
       seekPoint = clamp(seekPoint, 0, videoControls.videoLength); // Another clamp just for safety.
       videoControls.seek(seekPoint);
     },
-    [pinkAreaWidth, videoControls],
+    [pinkAreaWidth, videoControls, getRelativePos],
   );
 
   return (
@@ -81,7 +81,7 @@ function TimeStampSequence({
 }: Readonly<{ videoLength: number; scrubberWidth: number }>) {
   const baseTimeStampWidth = 128.0; // px
   const baseGraduation = videoLength * (baseTimeStampWidth / scrubberWidth);
-  let graduation = Math.ceil(baseGraduation); // Minimum of 1s graduation.
+  const graduation = Math.ceil(baseGraduation); // Minimum of 1s graduation.
 
   const timeStampWidth = Math.ceil(
     (baseTimeStampWidth * graduation) / baseGraduation,

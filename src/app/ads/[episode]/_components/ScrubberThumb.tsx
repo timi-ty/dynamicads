@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect } from "react";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import { clamp } from "~/utils/math";
 import {
