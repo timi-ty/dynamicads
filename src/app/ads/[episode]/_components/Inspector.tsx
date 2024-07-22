@@ -86,7 +86,7 @@ function Controls({
         </button>
       </div>
       <span className="rounded-md border p-3 pb-2 pt-2">
-        {millisecondsToHHMMSS(videoContext.getScrubberTime() * 1000)}
+        {millisecondsToHHMMSS(videoContext.controls.getVideoTime() * 1000)}
       </span>
       <ZoomSlider
         zoomIndex={zoomIndex}

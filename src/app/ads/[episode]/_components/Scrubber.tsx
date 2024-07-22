@@ -11,8 +11,7 @@ import AdMarkerHandle from "./AdMarkerHandle";
 const defaultPickAreaWidth = 1134; //cherry picked px value.
 
 export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
-  const { controls: videoControls, publishScrubberTime } =
-    useContext(EpisodeVideoContext);
+  const { controls: videoControls } = useContext(EpisodeVideoContext);
 
   // The pink area is the important part of the scrubber. It is the part that matches the video length.
   const pinkAreaRef = useRef<HTMLDivElement>(null);
@@ -33,10 +32,9 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
       let seekPoint =
         (clampedSeekPos / pinkAreaWidth) * videoControls.videoLength;
       seekPoint = clamp(seekPoint, 0, videoControls.videoLength); // Another clamp just for safety.
-      publishScrubberTime(seekPoint); // Make the scrubber time available even before seek settles.
       videoControls.seek(seekPoint);
     },
-    [pinkAreaWidth, videoControls, publishScrubberTime],
+    [pinkAreaWidth, videoControls],
   );
 
   return (

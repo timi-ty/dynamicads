@@ -28,9 +28,6 @@ export interface EpisodeVideoConsumer {
   setVideo: (video: HTMLVideoElement | null) => void;
   controls: VideoControls;
   episode: Episode;
-  getScrubberTime: () => number /* Scrubber time is updated much more frequently than video time. 
-  The video context allows injection and consumption of an arbitrary scrubber time.*/;
-  publishScrubberTime: (time: number) => void;
 }
 
 export function EpisodeVideoContextProvider({
@@ -38,14 +35,8 @@ export function EpisodeVideoContextProvider({
   children,
 }: Readonly<{ episode: Episode; children: ReactNode }>) {
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
-  const scrubberTime = useRef(0);
   const videoControls = useVideoControls(video);
   const { invalidateActionStack } = useGlobalActionStack();
-
-  const publishScrubberTime = useCallback(
-    (time: number) => (scrubberTime.current = time),
-    [],
-  );
 
   useEffect(() => {
     invalidateActionStack(); // Instead of handling different action stacks per episode, start fresh every time a different episode is picked.
@@ -57,8 +48,6 @@ export function EpisodeVideoContextProvider({
         setVideo: setVideo,
         controls: videoControls,
         episode: episode,
-        getScrubberTime: () => scrubberTime.current,
-        publishScrubberTime: publishScrubberTime,
       }}
     >
       {children}
@@ -106,6 +95,9 @@ const defaultConsumer: EpisodeVideoConsumer = {
     ): Listener {
       throw new Error("Function not implemented.");
     },
+    getVideoTime: function (): number {
+      throw new Error("Function not implemented.");
+    },
   },
   episode: {
     id: 0,
@@ -114,10 +106,6 @@ const defaultConsumer: EpisodeVideoConsumer = {
     createdById: "",
     name: "",
     videoUrl: "",
-  },
-  getScrubberTime: () => 0,
-  publishScrubberTime: function (_time: number): void {
-    throw new Error("Function not implemented.");
   },
 };
 

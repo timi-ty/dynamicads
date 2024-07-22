@@ -163,6 +163,10 @@ export function useVideoControls(
       video.currentTime = seekTime;
     }
 
+    function getVideoTime() {
+      return video?.currentTime ?? 0;
+    }
+
     // Components that set state in their smooth time update listener will rerender a lot - at the screen refresh rate.
     // Doing animations through react rerenders is not the best for performance, but results in cleaner code.
     function addSmoothTimeUpdateListener(
@@ -186,6 +190,7 @@ export function useVideoControls(
       jumpToStart,
       jumpToEnd,
       seek,
+      getVideoTime,
       addSmoothTimeUpdateListener,
     };
   }, [
@@ -218,6 +223,7 @@ export type VideoControls = {
   jumpToStart: () => void;
   jumpToEnd: () => void;
   seek: (seconds: number) => void;
+  getVideoTime: () => number;
   addSmoothTimeUpdateListener: (
     onTimeUpdate: (videoTime: number) => void,
   ) => Listener;

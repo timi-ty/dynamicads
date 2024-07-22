@@ -14,7 +14,7 @@ export default function ScrubberThumb({
   scrubberWidth: number;
   handleSeek: (clientMousePosX: number) => void;
 }>) {
-  const { controls, publishScrubberTime } = useContext(EpisodeVideoContext);
+  const { controls } = useContext(EpisodeVideoContext);
   const { videoLength, addSmoothTimeUpdateListener } = controls;
 
   const [isSeeking, setIsSeeking] = useState(false);
@@ -25,13 +25,11 @@ export default function ScrubberThumb({
       (smoothVideoTime) => {
         const clampedVideoTime = clamp(smoothVideoTime, 0, videoLength);
         setThumbProgress((clampedVideoTime / videoLength) * scrubberWidth); // Set the screen position of the thumb.
-        publishScrubberTime(clampedVideoTime); // Keep the scrubber time in sync with the video time.
       },
     );
     return () => smoothTimeUpdateListener.remove();
   }, [
     setThumbProgress,
-    publishScrubberTime,
     addSmoothTimeUpdateListener,
     scrubberWidth,
     videoLength,

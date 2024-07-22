@@ -45,7 +45,7 @@ export default function CreateAdMarkerButtons({
       const { marker, error } = await createMarker.mutateAsync({
         // No need to wrap in try block for actions.
         type: markerType,
-        value: Math.floor(videoContext.getScrubberTime() * 1000), // Marker values are stored in millis
+        value: Math.floor(videoContext.controls.getVideoTime() * 1000), // Marker values are stored in millis
         episodeId: episodeId,
       });
       if (error ?? !marker) {
