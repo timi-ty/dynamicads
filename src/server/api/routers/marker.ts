@@ -49,7 +49,11 @@ export const markerRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         const updatedMarker = await ctx.db.marker.update({
-          where: { id: input.markerId, createdById: ctx.session.user.id },
+          where: {
+            id: input.markerId,
+            createdById: ctx.session.user.id,
+            deleted: false,
+          },
           data: {
             type: input.type,
             value: input.value,
@@ -74,6 +78,7 @@ export const markerRouter = createTRPCRouter({
           where: {
             episodeId: input.episodeId,
             createdById: ctx.session.user.id,
+            deleted: false,
           },
         });
         return { markers: markers };
@@ -86,10 +91,29 @@ export const markerRouter = createTRPCRouter({
     .input(z.object({ markerId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        const deletedMarker = await ctx.db.marker.delete({
+        const deletedMarker = await ctx.db.marker.update({
           where: { id: input.markerId, createdById: ctx.session.user.id },
+          data: {
+            deleted: true,
+          },
         });
         return { deletedMarker: deletedMarker };
+      } catch {
+        return { error: "internal server error" };
+      }
+    }),
+
+  recover: protectedProcedure
+    .input(z.object({ markerId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const recoveredMarker = await ctx.db.marker.update({
+          where: { id: input.markerId, createdById: ctx.session.user.id },
+          data: {
+            deleted: false,
+          },
+        });
+        return { recoveredMarker: recoveredMarker };
       } catch {
         return { error: "internal server error" };
       }

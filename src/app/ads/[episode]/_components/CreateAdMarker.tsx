@@ -23,11 +23,23 @@ export default function CreateAdMarkerButtons({
   const queryUtils = api.useUtils();
   const createMarker = api.marker.create.useMutation();
   const deleteMarker = api.marker.delete.useMutation();
+  const recoverMarker = api.marker.recover.useMutation();
   const videoContext = useContext(EpisodeVideoContext);
   const { doAction } = useGlobalActionStack();
 
-  function handleFinish(markerType: AdMarkerType) {
-    async function primary() {
+  function handleCreate(markerType: AdMarkerType) {
+    async function primary(params?: { deletedMarkerId: number }) {
+      if (params) {
+        /* If we have primary params, that means we are calling primary as a redo action. 
+           In this particular case, the redo action is different from the original action.*/
+        const { recoveredMarker } = await recoverMarker.mutateAsync({
+          markerId: params.deletedMarkerId,
+        });
+        if (recoverMarker.error ?? !recoveredMarker) return null; // Nothing to undo.
+        void queryUtils.marker.getAll.invalidate();
+        return { markerId: recoveredMarker.id };
+      }
+
       setStatus("Finishing");
       const { marker, error } = await createMarker.mutateAsync({
         // No need to wrap in try block for actions.
@@ -47,9 +59,7 @@ export default function CreateAdMarkerButtons({
     async function revert(params?: { markerId: number }) {
       if (!params) return; // Did not get the needed parameters, can't revert.
 
-      /* This is better implemented as a soft delete. Deleting as a reversal of a creation means the data cannot be truly recovered.
-      Due to this, the redo stack must be invalidated*/
-      await deleteMarker.mutateAsync(
+      const { deletedMarker } = await deleteMarker.mutateAsync(
         { markerId: params.markerId },
         {
           onSettled: () => {
@@ -57,7 +67,9 @@ export default function CreateAdMarkerButtons({
           },
         },
       );
-      return null; // Deleting this maker is non-reversible as it would take on a new id if it gets recreated.
+      if (deleteMarker.error ?? !deletedMarker) return null; // Nothing to redo.
+
+      return { deletedMarkerId: deletedMarker.id };
     }
     void doAction(primary, revert);
   }
@@ -87,7 +99,7 @@ export default function CreateAdMarkerButtons({
         </button>
         <button
           className="font-inter flex w-full flex-row items-center justify-center gap-2 rounded-md border bg-white p-4 pb-3 pt-3 text-sm font-medium text-zinc-900"
-          onClick={() => handleFinish("Auto")}
+          onClick={() => handleCreate("Auto")}
         >
           <span>Automatically place</span>
           <Image
@@ -100,7 +112,7 @@ export default function CreateAdMarkerButtons({
       </div>
       <ConfigureAdMarkerModalGroup
         status={status}
-        handleFinish={handleFinish}
+        handleFinish={handleCreate}
         handleDismiss={handleDismiss}
       />
     </div>

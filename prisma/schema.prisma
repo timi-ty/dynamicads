@@ -50,4 +50,6 @@ model Marker {
 
     type  String
     value Int
+
+    deleted Boolean @default(false)
 }

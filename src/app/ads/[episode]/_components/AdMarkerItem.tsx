@@ -68,11 +68,11 @@ function BaseAdMarkerItem({
   isEditable: boolean;
   startEditing: () => void;
 }>) {
+  const [status, setStatus] = useState<ConfigureAdMarkerStatus>("Done");
+
   const queryUtils = api.useUtils();
   const deleteMarker = api.marker.delete.useMutation();
-  const createMarker = api.marker.create.useMutation();
-
-  const [status, setStatus] = useState<ConfigureAdMarkerStatus>("Done");
+  const recoverMarker = api.marker.recover.useMutation();
   const editMarker = api.marker.update.useMutation();
 
   const { doAction } = useGlobalActionStack();
@@ -124,29 +124,17 @@ function BaseAdMarkerItem({
       void queryUtils.marker.getAll.invalidate();
 
       return {
-        deletedMarkerType: deletedMarker.type as AdMarkerType,
-        deletedMarkerEpisodeId: deletedMarker.episodeId,
-        deletedMarkerValue: deletedMarker.value,
+        deletedMarkerId: id,
       };
     }
-    async function revert(params?: {
-      // A delete is not really reversible but we allow it to be reversed once at the cost of losing the the undo history.
-      deletedMarkerType: AdMarkerType;
-      deletedMarkerEpisodeId: number;
-      deletedMarkerValue: number;
-    }) {
+    async function revert(params?: { deletedMarkerId: number }) {
       if (!params) return null;
 
-      const { marker } = await createMarker.mutateAsync({
-        /* This is better implemented as a soft delete. Having to create a new marker for the effect of reversing a delete causes an 
-        edge case for the undo stack.  Due to this edge case, we have to invalidate the redo stack everytime we undo a delete.*/
-        type: params.deletedMarkerType,
-        value: params.deletedMarkerValue,
-        episodeId: params.deletedMarkerEpisodeId,
+      const { recoveredMarker } = await recoverMarker.mutateAsync({
+        markerId: params.deletedMarkerId,
       });
-      if (createMarker.error ?? !marker) return null;
+      if (recoverMarker.error ?? !recoveredMarker) return null; // Nothing to redo.
       void queryUtils.marker.getAll.invalidate();
-      return null; // Creating a new marker with a new unique id means this revert operation is non reversible. Return null. Undo history will be lost.
     }
     void doAction(primary, revert);
   }
