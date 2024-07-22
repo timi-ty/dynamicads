@@ -5,7 +5,7 @@ export function addWindowMouchUpListener(
 ): MouchListener {
   function mouseListener(ev: MouseEvent) {
     if (blockOthers) {
-      ev.stopPropagation();
+      ev.stopImmediatePropagation();
       ev.preventDefault();
     }
 
@@ -14,20 +14,30 @@ export function addWindowMouchUpListener(
 
   function touchListener(ev: TouchEvent) {
     if (blockOthers) {
-      ev.stopPropagation();
+      ev.stopImmediatePropagation();
       ev.preventDefault();
     }
 
     listener(undefined, ev);
   }
 
-  window.addEventListener("mouseup", mouseListener, { passive: !blockOthers });
-  window.addEventListener("touchend", touchListener, { passive: !blockOthers });
+  window.addEventListener("mouseup", mouseListener, {
+    passive: !blockOthers,
+    capture: blockOthers,
+  });
+  window.addEventListener("touchend", touchListener, {
+    passive: !blockOthers,
+    capture: blockOthers,
+  });
 
   return {
     remove: () => {
-      window.removeEventListener("mouseup", mouseListener);
-      window.removeEventListener("touchend", touchListener);
+      window.removeEventListener("mouseup", mouseListener, {
+        capture: blockOthers,
+      });
+      window.removeEventListener("touchend", touchListener, {
+        capture: blockOthers,
+      });
     },
   };
 }
@@ -39,7 +49,7 @@ export function addWindowMouchMoveListener(
 ): MouchListener {
   function mouseListener(ev: MouseEvent) {
     if (blockOthers) {
-      ev.stopPropagation();
+      ev.stopImmediatePropagation();
       ev.preventDefault();
     }
 
@@ -48,7 +58,7 @@ export function addWindowMouchMoveListener(
 
   function touchListener(ev: TouchEvent) {
     if (blockOthers) {
-      ev.stopPropagation();
+      ev.stopImmediatePropagation();
       ev.preventDefault();
     }
 
@@ -57,15 +67,21 @@ export function addWindowMouchMoveListener(
 
   window.addEventListener("mousemove", mouseListener, {
     passive: !blockOthers,
+    capture: blockOthers,
   });
   window.addEventListener("touchmove", touchListener, {
     passive: !blockOthers,
+    capture: blockOthers,
   });
 
   return {
     remove: () => {
-      window.removeEventListener("mousemove", mouseListener);
-      window.removeEventListener("touchmove", touchListener);
+      window.removeEventListener("mousemove", mouseListener, {
+        capture: blockOthers,
+      });
+      window.removeEventListener("touchmove", touchListener, {
+        capture: blockOthers,
+      });
     },
   };
 }
