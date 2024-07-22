@@ -37,14 +37,6 @@ export default function ScrubberThumb({
     videoLength,
   ]);
 
-  // This effect ensures that if mouse down was triggered by this scrubber thumb, any mouse events anywhere are handled by the scrubber thumb.
-  const handleSeekRef = useRef(handleSeek); // Create a reference to handleSeek to escape the closure.
-  const isSeekingRef = useRef(isSeeking); // Create a reference to isSeeking to escape the closure.
-  // Escape the closures to avoid having to rerun this effect on every frame becuase handleSeek is redeclared every frame.
-  // Attempting to useMemo or useCallback simply complicates the issue.
-  // This approach permits attaching the window level callbacks only once.
-  handleSeekRef.current = handleSeek; // Update this reference with the newest decalration of handleSeek.
-  isSeekingRef.current = isSeeking; // Update this reference with the current isSeeking state.
   useEffect(() => {
     function handleGlobalMouchUp() {
       setIsSeeking(false);
@@ -60,15 +52,21 @@ export default function ScrubberThumb({
         clientX = touchEvent.touches[0].clientX;
       }
 
-      if (isSeekingRef.current) handleSeekRef.current(clientX);
+      if (isSeeking) handleSeek(clientX);
     }
-    const mouchUpListener = addWindowMouchUpListener(handleGlobalMouchUp);
-    const mouchMoveListener = addWindowMouchMoveListener(handleGlobalMouchMove);
+    const mouchUpListener = addWindowMouchUpListener(
+      handleGlobalMouchUp,
+      isSeeking,
+    );
+    const mouchMoveListener = addWindowMouchMoveListener(
+      handleGlobalMouchMove,
+      isSeeking,
+    );
     return () => {
       mouchUpListener.remove();
       mouchMoveListener.remove();
     };
-  }, []);
+  }, [isSeeking, handleSeek]);
 
   return (
     <div

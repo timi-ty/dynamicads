@@ -16,6 +16,15 @@ export default function AdMarkerItem({
   value,
   type,
 }: Readonly<{ id: number; index: number; type: AdMarkerType; value: number }>) {
+  return <BaseAdMarkerItem id={id} index={index} type={type} value={value} />;
+}
+
+function BaseAdMarkerItem({
+  id,
+  index,
+  value,
+  type,
+}: Readonly<{ id: number; index: number; type: AdMarkerType; value: number }>) {
   const queryUtils = api.useUtils();
   const deleteMarker = api.marker.delete.useMutation();
   const createMarker = api.marker.create.useMutation();
@@ -25,7 +34,7 @@ export default function AdMarkerItem({
 
   const { doAction } = useGlobalActionStack();
 
-  function handleEdit(markerType: AdMarkerType) {
+  function handleEditType(markerType: AdMarkerType) {
     async function primary() {
       setStatus("Finishing");
       const { updatedMarker } = await editMarker.mutateAsync({
@@ -137,9 +146,13 @@ export default function AdMarkerItem({
       </div>
       <ConfigureAdMarkerModalGroup
         status={status}
-        handleFinish={handleEdit}
+        handleFinish={handleEditType}
         handleDismiss={handleDismiss}
       />
     </div>
   );
+}
+
+function EditAdMarkerTimeItem() {
+  return;
 }

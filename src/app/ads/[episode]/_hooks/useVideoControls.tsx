@@ -15,7 +15,6 @@ export function useVideoControls(
   const [isPaused, setIsPaused] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
   const [videoLength, setVideoLength] = useState(0);
-  const [videoTime, setVideoTime] = useState(0);
 
   const smoothVideoTime = useRef(0);
   const { startAnimation } = useAnimationManager();
@@ -49,16 +48,14 @@ export function useVideoControls(
       setVideoLength(currentVideo.duration);
     }
     function handleTimeUpdate() {
-      setVideoTime(currentVideo.currentTime);
       setIsBuffering(false);
     }
     function handleWaiting() {
-      void currentVideo.play(); // Only a currently playing video is considered as buffering.
+      if (currentVideo.paused) void currentVideo.play(); // Only a currently playing video is considered as buffering.
       setIsBuffering(true);
     }
     // Immediately call these two in case they are set before the effect runs.
     setVideoLength(currentVideo.duration);
-    setVideoTime(currentVideo.currentTime);
 
     const smoothVideoTimeAnimation = startAnimation(updateSmoothVideoTime);
     currentVideo.addEventListener("play", handlePlay);
@@ -180,7 +177,6 @@ export function useVideoControls(
       isReady: videoLength > 0,
       isRewinding,
       isFastforwarding,
-      videoTime,
       videoLength,
       togglePlay,
       plusSeconds,
@@ -198,7 +194,6 @@ export function useVideoControls(
     videoLength,
     isRewinding,
     isFastforwarding,
-    videoTime,
     video,
     setIsRewinding,
     setIsFastforwarding,
@@ -214,7 +209,6 @@ export type VideoControls = {
   isReady: boolean;
   isRewinding: boolean;
   isFastforwarding: boolean;
-  videoTime: number;
   videoLength: number;
   togglePlay: () => void;
   plusSeconds: (seconds: number) => void;

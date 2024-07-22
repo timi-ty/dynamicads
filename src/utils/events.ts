@@ -1,17 +1,28 @@
 // Combines window mouse up and touch up listeners.
 export function addWindowMouchUpListener(
   listener: (mouseEvent?: MouseEvent, touchEvent?: TouchEvent) => void,
+  blockOthers?: boolean,
 ): MouchListener {
   function mouseListener(ev: MouseEvent) {
+    if (blockOthers) {
+      ev.stopPropagation();
+      ev.preventDefault();
+    }
+
     listener(ev, undefined);
   }
 
   function touchListener(ev: TouchEvent) {
+    if (blockOthers) {
+      ev.stopPropagation();
+      ev.preventDefault();
+    }
+
     listener(undefined, ev);
   }
 
-  window.addEventListener("mouseup", mouseListener);
-  window.addEventListener("touchend", touchListener);
+  window.addEventListener("mouseup", mouseListener, { passive: !blockOthers });
+  window.addEventListener("touchend", touchListener, { passive: !blockOthers });
 
   return {
     remove: () => {
@@ -21,20 +32,35 @@ export function addWindowMouchUpListener(
   };
 }
 
-// Combines window mouse up and touch up listeners.
+// Combines window mouse move and touch move listeners.
 export function addWindowMouchMoveListener(
   listener: (mouseEvent?: MouseEvent, touchEvent?: TouchEvent) => void,
+  blockOthers?: boolean,
 ): MouchListener {
   function mouseListener(ev: MouseEvent) {
+    if (blockOthers) {
+      ev.stopPropagation();
+      ev.preventDefault();
+    }
+
     listener(ev, undefined);
   }
 
   function touchListener(ev: TouchEvent) {
+    if (blockOthers) {
+      ev.stopPropagation();
+      ev.preventDefault();
+    }
+
     listener(undefined, ev);
   }
 
-  window.addEventListener("mousemove", mouseListener);
-  window.addEventListener("touchmove", touchListener);
+  window.addEventListener("mousemove", mouseListener, {
+    passive: !blockOthers,
+  });
+  window.addEventListener("touchmove", touchListener, {
+    passive: !blockOthers,
+  });
 
   return {
     remove: () => {

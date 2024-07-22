@@ -1,4 +1,4 @@
-import { useContext, useRef, useMemo } from "react";
+import { useContext, useRef, useMemo, useCallback } from "react";
 import { clamp, windowToConatainerPoint } from "~/utils/math";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import Image from "next/image";
@@ -11,25 +11,28 @@ const defaultPickAreaWidth = 1134; //cherry picked px value.
 export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
   const { controls: videoControls, publishScrubberTime } =
     useContext(EpisodeVideoContext);
-  const { videoLength, seek } = videoControls;
 
   // The pink area is the important part of the scrubber. It is the part that matches theh video length.
   const pinkAreaRef = useRef<HTMLDivElement>(null);
-  const pinkAreaWidth = defaultPickAreaWidth * zoom;
+  const pinkAreaWidth = useMemo(() => defaultPickAreaWidth * zoom, [zoom]);
 
-  function handleSeek(clientMousePosX: number) {
-    if (!pinkAreaRef.current) return;
+  const handleSeek = useCallback(
+    (clientMousePosX: number) => {
+      if (!pinkAreaRef.current) return;
 
-    const relativeMousePos = windowToConatainerPoint(pinkAreaRef.current, {
-      x: clientMousePosX,
-      y: 0,
-    });
-    const clampedSeekPos = clamp(relativeMousePos.x, 0, pinkAreaWidth);
-    let seekPoint = (clampedSeekPos / pinkAreaWidth) * videoLength;
-    seekPoint = clamp(seekPoint, 0, videoLength); // Another clamp just for safety.
-    publishScrubberTime(seekPoint); // Make the scrubber time available even before seek settles.
-    seek(seekPoint);
-  }
+      const relativeMousePos = windowToConatainerPoint(pinkAreaRef.current, {
+        x: clientMousePosX,
+        y: 0,
+      });
+      const clampedSeekPos = clamp(relativeMousePos.x, 0, pinkAreaWidth);
+      let seekPoint =
+        (clampedSeekPos / pinkAreaWidth) * videoControls.videoLength;
+      seekPoint = clamp(seekPoint, 0, videoControls.videoLength); // Another clamp just for safety.
+      publishScrubberTime(seekPoint); // Make the scrubber time available even before seek settles.
+      videoControls.seek(seekPoint);
+    },
+    [pinkAreaWidth, videoControls, publishScrubberTime],
+  );
 
   return (
     <div className="w-full overflow-x-scroll pb-8 pt-4">
@@ -60,7 +63,7 @@ export default function Scrubber({ zoom }: Readonly<{ zoom: number }>) {
           />
         </div>
         <TimeStampSequence
-          videoLength={videoLength}
+          videoLength={videoControls.videoLength}
           pinkAreaWidth={pinkAreaWidth}
           zoom={zoom}
         />

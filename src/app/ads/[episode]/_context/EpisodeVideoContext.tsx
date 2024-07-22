@@ -72,7 +72,6 @@ const defaultConsumer: EpisodeVideoConsumer = {
   },
   controls: {
     isPaused: false,
-    videoTime: 0,
     videoLength: 0,
     togglePlay: function (): void {
       throw new Error("Function not implemented.");
