@@ -238,15 +238,13 @@ function EditAdMarkerTimeItem({
     async function revert(params?: { oldMarkerType: AdMarkerType }) {
       if (!params) return;
 
-      await editMarker.mutateAsync(
-        { type: params.oldMarkerType, value: value, markerId: id },
-        {
-          onSuccess: () => {
-            setStatus("Done");
-            void queryUtils.marker.getAll.invalidate();
-          },
-        },
-      );
+      const { updatedMarker } = await editMarker.mutateAsync({
+        type: params.oldMarkerType,
+        value: value,
+        markerId: id,
+      });
+      if (editMarker.error ?? !updatedMarker) return null; // Undo failed.
+      void queryUtils.marker.getAll.invalidate();
     }
     void doAction(primary, revert);
   }
@@ -260,25 +258,22 @@ function EditAdMarkerTimeItem({
         value: clampedValue,
         markerId: id,
       });
-      if (editMarker.error ?? !updatedMarker) {
-        return null; // Nothing to revert.
-      }
-      finishEditing();
+      if (editMarker.error ?? !updatedMarker) return null; // Nothing to revert.
       void queryUtils.marker.getAll.invalidate();
+      finishEditing();
 
       return { oldMarkerValue: value };
     }
     async function revert(params?: { oldMarkerValue: number }) {
       if (!params) return;
 
-      await editMarker.mutateAsync(
-        { type: type, value: params.oldMarkerValue, markerId: id },
-        {
-          onSuccess: () => {
-            void queryUtils.marker.getAll.invalidate();
-          },
-        },
-      );
+      const { updatedMarker } = await editMarker.mutateAsync({
+        type: type,
+        value: params.oldMarkerValue,
+        markerId: id,
+      });
+      if (editMarker.error ?? !updatedMarker) return null; // Undo failed.
+      void queryUtils.marker.getAll.invalidate();
     }
     void doAction(primary, revert);
   }
