@@ -2,6 +2,10 @@ import Image from "next/image";
 import { useContext, useState, useEffect, useRef } from "react";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
 import { clamp } from "~/utils/math";
+import {
+  addWindowMouchMoveListener,
+  addWindowMouchUpListener,
+} from "~/utils/events";
 
 export default function ScrubberThumb({
   scrubberWidth,
@@ -42,17 +46,27 @@ export default function ScrubberThumb({
   handleSeekRef.current = handleSeek; // Update this reference with the newest decalration of handleSeek.
   isSeekingRef.current = isSeeking; // Update this reference with the current isSeeking state.
   useEffect(() => {
-    function handleGlobalMouseUp() {
+    function handleGlobalMouchUp() {
       setIsSeeking(false);
     }
-    function handleGlobalMouseMove(ev: MouseEvent) {
-      if (isSeekingRef.current) handleSeekRef.current(ev.clientX);
+    function handleGlobalMouchMove(
+      mouseEvent?: MouseEvent,
+      touchEvent?: TouchEvent,
+    ) {
+      let clientX = 0;
+      if (mouseEvent) {
+        clientX = mouseEvent.clientX;
+      } else if (touchEvent && touchEvent.touches[0]) {
+        clientX = touchEvent.touches[0].clientX;
+      }
+
+      if (isSeekingRef.current) handleSeekRef.current(clientX);
     }
-    window.addEventListener("mouseup", handleGlobalMouseUp);
-    window.addEventListener("mousemove", handleGlobalMouseMove);
+    const mouchUpListener = addWindowMouchUpListener(handleGlobalMouchUp);
+    const mouchMoveListener = addWindowMouchMoveListener(handleGlobalMouchMove);
     return () => {
-      window.removeEventListener("mouseup", handleGlobalMouseUp);
-      window.removeEventListener("mousemove", handleGlobalMouseMove);
+      mouchUpListener.remove();
+      mouchMoveListener.remove();
     };
   }, []);
 
@@ -66,6 +80,12 @@ export default function ScrubberThumb({
       onMouseDown={(ev) => {
         setIsSeeking(true);
         handleSeek(ev.clientX);
+      }}
+      onTouchStart={(ev) => {
+        if (ev.touches[0]) {
+          setIsSeeking(true);
+          handleSeek(ev.touches[0].clientX);
+        }
       }}
     >
       <Image

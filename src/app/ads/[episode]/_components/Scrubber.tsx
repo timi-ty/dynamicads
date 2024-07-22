@@ -1,7 +1,6 @@
 import { useContext, useRef, useMemo } from "react";
-import { clamp } from "~/utils/math";
+import { clamp, windowToConatainerPoint } from "~/utils/math";
 import EpisodeVideoContext from "../_context/EpisodeVideoContext";
-import { windowToConatainerPoint } from "../_hooks/useMousePos";
 import Image from "next/image";
 import { millisecondsToHHMMSS } from "~/utils/format";
 import { api } from "~/trpc/react";
